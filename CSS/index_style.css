@@ -1,0 +1,389 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url('../Fotos/Fundo.png') no-repeat center center/cover;
+}
+.container {
+    position: relative;
+    width: 400px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px red;
+    text-align: center;
+    overflow: hidden;
+}
+
+.toggle {
+    color: red;
+    cursor: pointer;
+    font-weight: bold;
+}
+.confirmation-box {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px red;
+    text-align: center;
+}
+
+.left, .right {
+    width: 50%;
+    transition: filter 0.5s ease-in-out;
+}
+
+.left {
+    background-color: rgb(255, 255, 255);
+    filter: brightness(1);
+}
+
+.right {
+    background-color: rgb(255, 255, 255);
+    filter: brightness(0.3);
+}
+
+.container:hover .left {
+    filter: brightness(0.3);
+}
+
+.container:hover .right {
+    filter: brightness(0.3);
+}
+
+.left:hover {
+    filter: brightness(1) !important;
+}
+
+.left:hover ~ .right {
+    filter: brightness(0.3) !important;
+}
+
+.right:hover {
+    filter: brightness(1) !important;
+}
+
+.right:hover ~ .left {
+    filter: brightness(0.3) !important;
+}
+
+.center {
+    text-align: center;
+    width: 100%;
+    padding-top: 10px;
+}
+
+h1, h2, h3 {
+    font-weight: bold;
+    text-align: center;
+}
+
+h1 {
+    font-size: 28px;
+    color: #8B0000;
+}
+
+h2 {
+    font-size: 22px;
+    color: #c20d0d;
+}
+
+h3 {
+    font-size: 18px;
+    color: #666;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+input {
+    width: 80%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.left, .right {
+    width: 45%;
+    min-height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.hidden {
+    display: none;
+}
+
+.back-btn {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.back-btn:hover {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.login-container {
+    width: 80%;
+    max-width: 300px;
+    text-align: center;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    font-size: 22px;
+    color: #8B0000;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.login-container button {
+    width: 80%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #8B0000;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.login-container button:hover {
+    background-color: #c20d0d;
+}
+
+.forgot-password {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 14px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+img {
+    border-radius: 5px;
+}
+
+.form-box {
+    display: none;
+    width: 100%;
+}
+
+.form-box.active {
+    display: block;
+}
+
+.logo {
+    width: 100px;
+    margin-bottom: 15px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid red;
+    border-radius: 5px;
+}
+
+.btn {
+    width: 100%;
+    padding: 10px;
+    background: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+button {
+    padding: 12px 25px;
+    background-color: #8B0000;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.3s ease-in-out;
+}
+
+button:hover {
+    background-color: #c20d0d;
+}
+
+.mensagem {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 1000;
+    color: white;
+    text-align: center;
+}
+
+.mensagem.sucesso {
+    background-color: green;
+}
+
+.mensagem.erro {
+    background-color: red;
+}
+
+#cpf {
+    margin-bottom: 2px; /* Reduz o espaço abaixo do campo CPF */
+}
+
+.mensagem {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 1000;
+    color: white;
+    text-align: center;
+}
+
+.mensagem.sucesso {
+    background-color: green;
+}
+
+.mensagem.erro {
+    background-color: red;
+}
+/* Mensagens */
+.mensagem-cpf {
+    font-size: 0.8em;
+    margin-top: 5px;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.mensagem-cpf.valido {
+    color: #4CAF50;
+}
+
+.mensagem-cpf.invalido {
+    color: #F44336;
+}
+
+.mensagem-sistema {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateX(-50%) translateY(0); }
+    to { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}
+
+/* Spinner */
+.spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Formulários */
+.login-box:not(.active),
+.register-box:not(.active) {
+    display: none;
+}
+/* Estilo para o campo CPF e mensagem */
+#cpf {
+    margin-bottom: 0; /* Remove margem inferior para aproximar da mensagem */
+}
+
+#cpf-mensagem {
+    margin-top: 4px;
+    font-size: 0.85rem;
+    min-height: 18px; /* Mantém o espaço mesmo sem mensagem */
+    color: #6c757d;
+}
+
+/* Estilos para os ícones de validação */
+#cpf-mensagem span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Cores para os estados */
+.text-success {
+    color: #28a745;
+}
+
+.text-error {
+    color: #dc3545;
+}

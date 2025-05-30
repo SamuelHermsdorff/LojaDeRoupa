@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identidade - Login</title>
+    <link rel="icon" type="image/x-icon" href="./Fotos/favicon.ico">
+    <link rel="stylesheet" href="CSS/index_style.css">
+</head>
+<body>
+
+<!-- Container para a mensagem de sucesso ou erro -->
+<div id="mensagem"></div>
+
+    <div class="container">
+        <div class="form-box login-box active">
+            <img src="Fotos/Logo.png" alt="Identidade" class="logo">
+            <h2>Login</h2>
+            <form id="login-form" method="POST">
+                <input type="email" name="email" placeholder="E-mail" required>
+                <input type="password" name="senha" placeholder="Senha" required>
+                <button class="btn" type="submit">Entrar</button><br> 
+            </form>
+            <br><p>Não tem uma conta? <span class="toggle">Cadastre-se</span></p>
+        </div>
+        
+
+        <div class="form-box register-box">
+            <img src="Fotos/Logo.png" alt="Identidade" class="logo">
+            <h2>Cadastro</h2>
+            <form method="POST" action="PHP/cadastrar.php">
+                <input type="text" name="nome" placeholder="Nome" oninput="formatNome(event)" required>
+                <!--<input type="text" id="cpf" name="cpf" placeholder="CPF" required maxlength="14" oninput="formatCPF(event)">-->
+                <input type="text" id="cpf" name="cpf" placeholder="CPF" required maxlength="14">
+                <input type="tel" id="telefone" name="telefone" placeholder="Telefone" required maxlength="15">
+                <input type="email" name="email" placeholder="E-mail" required>
+                <input type="password" name="senha" placeholder="Senha" required>
+                <!--<button class="btn register-btn" type="submit" onclick="confirmRegistration()">Cadastrar</button><br>-->
+                <button type="submit" class="btn register-btn">Cadastrar</button>
+                <br><p><span class="toggle">Voltar ao login</span></p>
+            </form>
+        </div>
+    </div>
+    
+    <script src="JS/index-java.js"></script>
+</body>
+</html>

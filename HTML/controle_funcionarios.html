@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Identidade - Controle de Funcionários</title>
+    <link rel="icon" type="image/x-icon" href="../Fotos/favicon.ico">
+  <link rel="stylesheet" href="../CSS/controle_funcionario_style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="../Fotos/logo.png" alt="Logo Identidade">
+      <h1>Identidade</h1>
+    </div>
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+  </header>
+
+  <div class="sidebar" id="sidebar">
+    <h2 class="menu-title">Menu</h2>
+    <ul>
+      <li onclick="window.location.href='catalogo.html'">Tela Inicial</li>
+      <li onclick="window.location.href='perfil.html'">Meu Perfil</li>
+      <li class="submenu">
+        Cliente
+        <ul>
+          <li onclick="window.location.href='minhas_compras.html'">Minhas compras</li>
+        </ul>
+      </li>
+      <li class="submenu">
+        Funcionário
+        <ul>
+          <li onclick="window.location.href='controle_vendas.html'">Gerenciar vendas</li>
+          <li onclick="window.location.href='controle_produtos.html'">Gerenciar Produtos</li>
+          <li onclick="window.location.href='controle_fornecedores.html'">Gerenciar Fornecedores</li>
+        </ul>
+      </li>
+      <li class="submenu">
+        Administrador
+        <ul>
+          <li onclick="window.location.href='controle_produtos.html'">Gerenciar Produtos</li>
+          <li onclick="window.location.href='controle_funcionarios.html'">Gerenciar Funcionários</li>
+          <li onclick="window.location.href='controle_clientes.html'">Gerenciar Clientes</li>
+          <li onclick="window.location.href='controle_fornecedores.html'">Gerenciar Fornecedores</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <main>
+    <div class="filters">
+      <input type="text" placeholder="Pesquisar funcionário...">
+      <button class="add-button" onclick="openEmployeeModal()">Cadastrar Funcionário</button>
+    </div>
+
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome Completo</th>
+          <th>CPF</th>
+          <th>Telefone</th>
+          <th>Email</th>
+          <th>Senha</th>
+          <th>Admin</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="employee-table-body">
+        <!-- Aqui cai o conteúdo da tabela -->
+      </tbody>
+    </table>
+  </main>
+
+  <div id="employee-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeEmployeeModal()">&times;</span>
+      <h3>Cadastrar Funcionário</h3>
+      <form id="employee-form">
+        <label for="employee-name">Nome Completo:</label>
+        <input type="text" id="employee-name" required>
+
+        <label for="employee-cpf">CPF:</label>
+        <input type="text" id="employee-cpf" required>
+
+        <label for="employee-phone">Telefone:</label>
+        <input type="text" id="employee-phone" required>
+
+        <label for="employee-email">Email:</label>
+        <input type="email" id="employee-email" required>
+
+        <div class="password-container">
+          <label for="employee-password">Senha:</label>
+          <input type="password" id="employee-password">
+          <button type="button" class="toggle-password" onclick="togglePasswordVisibility('employee-password')">👁️</button>
+        </div>
+
+        <label for="employee-admin">Admin:</label>
+        <select id="employee-admin" required>
+          <option value="Sim">Sim</option>
+          <option value="Não">Não</option>
+        </select>
+
+        <button type="button" class="save-button" onclick="saveEmployee()">Cadastrar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="confirmation-modal" class="confirmation-modal">
+    <div class="confirmation-content">
+      <h3 id="confirmation-message">Deseja realmente apagar este registro?</h3>
+      <div class="confirmation-buttons">
+        <button onclick="confirmAction(true)">Sim</button>
+        <button onclick="confirmAction(false)">Não</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../JS/controle-funcionarios-java.js"></script>
+</body>
+</html>
+
+<?php
+session_start();
+if (!isset($_SESSION['usuario_logado'])) {
+    header("Location: ../index.html");
+    exit();
+}
+
+if (!$_SESSION['usuario']['funcionario'] && !$_SESSION['usuario']['administrador']) {
+    header("Location: catalogo.php");
+    exit();
+}
+?>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Identidade - Controle de Clientes</title>
+  <!--<link rel="stylesheet" href="../CSS/controle_clientes_style.css">-->
+  <link rel="stylesheet" href="../CSS/controle_funcionario_style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="../Fotos/logo.png" alt="Logo Identidade">
+      <h1>Identidade</h1>
+    </div>
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+  </header>
+
+<!-- Container para a mensagem de sucesso ou erro -->
+<div id="mensagem"></div>
+
+  <main>
+    <div class="filters">
+        <!--<input type="text" id="search-client" placeholder="Pesquisar usuário...">-->
+      <!--<button class="add-button" onclick="openClientModal()">Cadastrar Cliente</button>-->
+      <input type="text" placeholder="Pesquisar funcionário...">
+      <button class="add-button" onclick="openEmployeeModal()">Cadastrar Funcionário</button>
+    </div>
+
+
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome Completo</th>
+          <th>CPF</th>
+          <th>Telefone</th>
+          <th>Email</th>
+          <th>Senha</th>
+          <th>Admin</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="employee-table-body">
+        <!-- Aqui cai o conteúdo da tabela -->
+      </tbody>
+    </table>
+  </main>
+
+
+  <div id="employee-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeEmployeeModal()">&times;</span>
+      <h3>Cadastrar Funcionário</h3>
+      <form id="employee-form">
+        <label for="employee-name">Nome Completo:</label>
+        <input type="text" id="employee-name" required>
+
+        <label for="employee-cpf">CPF:</label>
+        <input type="text" id="employee-cpf" required>
+
+        <label for="employee-phone">Telefone:</label>
+        <input type="text" id="employee-phone" required>
+
+        <label for="employee-email">Email:</label>
+        <input type="email" id="employee-email" required>
+
+        <div class="password-container">
+          <label for="employee-password">Senha:</label>
+          <input type="password" id="employee-password">
+          <button type="button" class="toggle-password" onclick="togglePasswordVisibility('employee-password')">👁️</button>
+        </div>
+
+        <label for="employee-admin">Admin:</label>
+        <select id="employee-admin" required>
+          <option value="Sim">Sim</option>
+          <option value="Não">Não</option>
+        </select>
+
+        <button type="button" class="save-button" onclick="saveEmployee()">Cadastrar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="confirmation-modal" class="confirmation-modal">
+    <div class="confirmation-content">
+      <h3 id="confirmation-message">Deseja realmente apagar este registro?</h3>
+      <div class="confirmation-buttons">
+        <button onclick="confirmarAcao(true)">Sim</button>
+        <button onclick="confirmarAcao(false)">Não</button>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="../JS/controle-funcionarios-java.js"></script>
+  <script src="../JS/sidebar.js"></script>
+  <script> criarSidebar(); </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: black;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo img {
+  border-radius: 5px;
+  height: 30px;
+  margin-right: 20px;
+}
+
+.logo h1 {
+  color: white;
+  font-size: 20px;
+  margin: 0;
+}
+
+.menu-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+}
+
+.sidebar {
+  width: 250px;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  right: -250px;
+  background-color: white;
+  transition: 0.3s;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.sidebar.active {
+  right: 0;
+}
+
+.menu-title {
+  padding: 20px;
+  margin: 0;
+  font-size: 20px;
+  color: black;
+  border-bottom: 1px solid #ddd;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar ul li {
+  padding: 10px 20px;
+  color: black;
+  cursor: pointer;
+  font-size: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.sidebar ul li:hover {
+  background-color: #f5f5f5;
+}
+
+.submenu ul {
+    display: none;  /* Inicialmente escondido */
+    padding-left: 20px;
+    max-height: 0; /* Inicialmente escondido */
+    overflow: hidden; /* Para evitar que o conteúdo vaze */
+    transition: max-height 0.3s ease-out; /* Transição suave */
+}
+
+.submenu.active ul {
+    display: block; /* Exibir submenu */
+    max-height: 1000px; /* Valor alto para garantir que o conteúdo se expanda */
+    transition: max-height 0.3s ease-in; /* Usar transição suave */
+}
+
+.catalog-title {
+  text-align: center;
+  font-size: 24px;
+  color: black;
+  margin: 20px 0;
+}
+
+.filters {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  background-color: #8B0000;
+  border-bottom: 1px solid #ddd;
+}
+
+.filters input, .filters select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+
+.filters input:focus, .filters select:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.product-card {
+  border: 1px solid #ddd;
+  padding: 15px;
+  text-align: center;
+  background-color: white;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border-radius: 10px;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.product-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.product-card h3 {
+  margin: 10px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.colors {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+.colors span {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+}
+
+.colors .black { background-color: black; }
+.colors .white { background-color: white; }
+.colors .red { background-color: red; }
+
+.availability {
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.availability.available {
+  color: green;
+}
+
+.availability.unavailable {
+  color: red;
+}
+
+.price {
+  color: red;
+  font-weight: bold;
+  margin: 10px 0;
+  font-size: 18px;
+}
+
+.buy-button {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.buy-button:hover {
+  background-color: #c82333;
+}
+
+.buy-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+.mensagem {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 1000;
+    color: white;
+    text-align: center;
+}
+
+.mensagem.sucesso {
+    background-color: green;
+}
+
+.mensagem.erro {
+    background-color: red;
+}

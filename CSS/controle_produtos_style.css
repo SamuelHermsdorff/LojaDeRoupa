@@ -1,0 +1,328 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: black;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+  
+.logo {
+    display: flex;
+    align-items: center;
+}
+  
+.logo img {
+    border-radius: 5px;
+    height: 30px;
+    margin-right: 20px;
+}
+  
+.logo h1 {
+    color: white;
+    font-size: 20px;
+    margin: 0;
+}
+  
+.menu-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}
+
+.sidebar {
+    width: 250px;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    right: -250px;
+    background-color: white;
+    transition: 0.3s;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+  
+.sidebar.active {
+    right: 0;
+}
+  
+.menu-title {
+    padding: 20px;
+    margin: 0;
+    font-size: 20px;
+    color: black;
+    border-bottom: 1px solid #ddd;
+}
+  
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+  
+.sidebar ul li {
+    padding: 10px 20px;
+    color: black;
+    cursor: pointer;
+    font-size: 16px;
+    border-bottom: 1px solid #ddd;
+}
+  
+.sidebar ul li:hover {
+    background-color: #f5f5f5;
+}
+  
+.submenu ul {
+    display: none;
+    padding-left: 20px;
+}
+  
+.submenu.active ul {
+    display: block;
+}
+
+main {
+    padding: 20px;
+}
+  
+.control-title {
+    text-align: center;
+    font-size: 24px;
+    color: black;
+    margin-bottom: 20px;
+}
+  
+.filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+  
+.filters input, .filters select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: 'Poppins', sans-serif;
+}
+  
+.add-button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+  
+.add-button:hover {
+    background-color: #c82333;
+}
+
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+  
+.product-table th, .product-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+  
+.product-table th {
+    background-color: #8B0000;
+    color: white;
+}
+  
+.product-table tr:hover {
+    background-color: #f5f5f5;
+}
+  
+.edit-button, .delete-button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+  
+.edit-button {
+    background-color: #ffc107;
+    color: black;
+}
+  
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+  
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px; 
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto; 
+    max-height: 90vh; 
+}
+  
+.modal-content h3 {
+    margin-top: 0;
+    color: red;
+}
+  
+.modal-content label {
+    display: block;
+    margin: 10px 0 5px;
+}
+  
+.modal-content input, .modal-content select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+  
+.save-button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+}
+  
+.save-button:hover {
+    background-color: #c82333;
+}
+  
+.close-button {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+  
+.close-button:hover {
+    color: red;
+}
+
+.confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.confirmation-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    text-align: center;
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.close-button {
+    float: right;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+.confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1002;
+}
+
+.confirmation-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+}
+.mensagem {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 1000;
+    color: white;
+    text-align: center;
+}
+
+.mensagem.sucesso {
+    background-color: green;
+}
+
+.mensagem.erro {
+    background-color: red;
+}

@@ -1,0 +1,498 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: black;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    border-radius: 5px;
+    height: 30px;
+    margin-right: 20px;
+}
+
+.logo h1 {
+    color: white;
+    font-size: 20px;
+    margin: 0;
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}
+
+.sidebar {
+    width: 250px;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    right: -250px;
+    background-color: white;
+    transition: 0.3s;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.sidebar.active {
+    right: 0;
+}
+
+.menu-title {
+    padding: 20px;
+    margin: 0;
+    font-size: 20px;
+    color: black;
+    border-bottom: 1px solid #ddd;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar ul li {
+    padding: 10px 20px;
+    color: black;
+    cursor: pointer;
+    font-size: 16px;
+    border-bottom: 1px solid #ddd;
+}
+
+.sidebar ul li:hover {
+    background-color: #f5f5f5;
+}
+
+.submenu ul {
+    display: none;
+    padding-left: 20px;
+}
+
+.submenu.active ul {
+    display: block;
+}
+
+main {
+    padding: 20px;
+}
+
+.filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.filters input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.add-button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.add-button:hover {
+    background-color: #c82333;
+}
+
+.client-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    table-layout: fixed;
+}
+
+.client-table th, .client-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.client-table th {
+    background-color: #8B0000;
+    color: white;
+}
+
+.client-table tr:hover {
+    background-color: #f5f5f5;
+}
+
+.client-table td:hover {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    z-index: 1; 
+    position: relative;
+}
+
+.edit-button, .delete-button, .view-address-button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1002;
+}
+
+.edit-button {
+    background-color: #ffc107;
+    color: black;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.view-address-button {
+    background-color: #007bff;
+    color: white;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1003;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: red;
+}
+
+.modal-content label {
+    display: block;
+    margin: 10px 0 5px;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-buttons .save-button, .modal-buttons .cancel-button {
+    width: 48%;
+    margin: 0;
+}
+
+.save-button, .cancel-button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.save-button2 {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.save-button:hover, .cancel-button:hover {
+    background-color: #c82333;
+}
+
+.close-button {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+.close-button:hover {
+    color: red;
+}
+
+.password-container {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.2em;
+}
+
+.actions {
+    display: flex;
+    gap: 5px;
+}
+
+.actions button {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    z-index: 1002;
+}
+
+.confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1004;
+}
+
+.confirmation-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    text-align: center;
+}
+
+.confirmation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.campo-invalido {
+    border: 1px solid red !important;
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+}
+.mensagem-validacao {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+}
+.mensagem-validacao.sucesso {
+    color: green;
+}
+.mensagem-validacao.erro {
+    color: red;
+}
+.campo-invalido {
+    border-color: red !important;
+}
+.campo-invalido {
+    border-color: #ff4444 !important;
+    background-color: #fff8f8 !important;
+    animation: shake 0.5s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+.campo-invalido {
+    border: 2px solid #ff4444 !important;
+    background-color: #fff8f8 !important;
+}
+
+.campo-invalido:focus {
+    outline: none;
+    box-shadow: 0 0 5px #ff4444;
+}
+.confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.confirmation-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+}
+
+.confirmation-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.confirmation-buttons button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.confirmation-buttons button:first-child {
+    background-color: #dc3545;
+    color: white;
+}
+
+.confirmation-buttons button:last-child {
+    background-color: #6c757d;
+    color: white;
+}
+.confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.confirmation-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+}
+
+.confirmation-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.confirmation-buttons button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.confirmation-buttons button:first-child {
+    background-color: #dc3545;
+    color: white;
+}
+
+.confirmation-buttons button:last-child {
+    background-color: #6c757d;
+    color: white;
+}
+.mensagem {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    z-index: 1000;
+    color: white;
+    text-align: center;
+}
+
+.mensagem.sucesso {
+    background-color: green;
+}
+
+.mensagem.erro {
+    background-color: red;
+}
+#search-client {
+    padding: 8px 12px;
+    width: 300px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+
+.filters {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+#employee-field {
+    margin: 15px 0;
+    padding: 10px 0;
+    border-top: 1px solid #eee;
+}
+
+#employee-field label {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+#employee-field input[type="checkbox"] {
+    width: auto;
+    display: inline-block;
+    margin-right: 5px;
+}
+

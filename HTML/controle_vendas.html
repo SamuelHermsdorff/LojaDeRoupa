@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Identidade - Editar Perfil</title>
+    <link rel="icon" type="image/x-icon" href="../Fotos/favicon.ico">
+  <link rel="stylesheet" href="../CSS/controle_vendas_style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="../Fotos/logo.png" alt="Logo Identidade">
+      <h1>Identidade</h1>
+    </div>
+    <button class="menu-button" onclick="toggleMenu()">☰</button>
+  </header>
+
+  <div class="sidebar" id="sidebar">
+    <h2 class="menu-title">Menu</h2>
+    <ul>
+      <li onclick="window.location.href='catalogo.html'">Tela Inicial</li>
+      <li onclick="window.location.href='perfil.html'">Meu Perfil</li>
+      <li class="submenu">
+        Cliente
+        <ul>
+          <li onclick="window.location.href='minhas_compras.html'">Minhas compras</li>
+        </ul>
+      </li>
+      <li class="submenu">
+        Funcionário
+        <ul>
+            <li onclick="window.location.href='controle_vendas.html'">Gerenciar vendas</li>
+            <li onclick="window.location.href='controle_produtos.html'">Gerenciar Produtos</li>
+            <li onclick="window.location.href='controle_fornecedores.html'">Gerenciar Fornecedores</li>
+        </ul>
+      </li>
+      <li class="submenu">
+        Administrador
+        <ul>
+          <li onclick="window.location.href='controle_produtos.html'">Gerenciar Produtos</li>
+          <li onclick="window.location.href='controle_funcionarios.html'">Gerenciar Funcionários</li>
+          <li onclick="window.location.href='controle_clientes.html'">Gerenciar Clientes</li>
+          <li onclick="window.location.href='controle_fornecedores.html'">Gerenciar Fornecedores</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <main>
+    <div class="sales-control">
+      <h2>Vendas do Dia</h2>
+      <div class="filter-section">
+        <input type="date" id="filter-date" class="filter-input">
+        <button class="filter-button">Filtrar</button>
+      </div>
+      <div class="sales-list">
+        <div class="sale-item">
+          <div class="sale-header">
+            <span class="sale-id">Código Carrinho: #12345</span>
+            <span class="sale-total">Total: R$ 500,00</span>
+            <span class="sale-payment">Pagamento: PIX</span>
+          </div>
+          <div class="sale-products">
+            <div class="products-container">
+              <div class="product-item">
+                <img src="../Fotos/produto1.jpg" alt="Produto 1" class="product-image">
+                <div class="product-info">
+                  <span>Código: 001</span>
+                  <span>Nome: Camiseta Preta</span>
+                  <span>Cores: Preto</span>
+                  <span>Preço: R$ 100,00</span>
+                  <span>Tamanho: M</span>
+                </div>
+              </div>
+              <div class="product-item">
+                <img src="../Fotos/produto2.jpg" alt="Produto 2" class="product-image">
+                <div class="product-info">
+                  <span>Código: 002</span>
+                  <span>Nome: Calça Jeans</span>
+                  <span>Cores: Azul</span>
+                  <span>Preço: R$ 150,00</span>
+                  <span>Tamanho: 42</span>
+                </div>
+              </div>
+              <div class="product-item">
+                <img src="../Fotos/produto3.jpg" alt="Produto 3" class="product-image">
+                <div class="product-info">
+                  <span>Código: 003</span>
+                  <span>Nome: Tênis Esportivo</span>
+                  <span>Cores: Branco</span>
+                  <span>Preço: R$ 250,00</span>
+                  <span>Tamanho: 40</span>
+                </div>
+              </div>
+              <div class="product-item">
+                <img src="../Fotos/produto4.jpg" alt="Produto 4" class="product-image">
+                <div class="product-info">
+                  <span>Código: 004</span>
+                  <span>Nome: Jaqueta de Couro</span>
+                  <span>Cores: Preto</span>
+                  <span>Preço: R$ 500,00</span>
+                  <span>Tamanho: G</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="sale-status">
+            <label for="status">Data limite de entrega: 11/04/2025</label>
+            <label for="status">Status:</label>
+            <select id="status" class="status-select">
+              <option value="Pago">Pago</option>
+              <option value="Produto Enviado">Produto Enviado</option>
+            </select>
+            <button class="save-button" onclick="confirmSend()">Salvar</button>
+            <button class="details-button" onclick="showCustomerDetails()">Ver detalhes do cliente</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sales-list">
+        <div class="sale-item">
+          <div class="sale-header">
+            <span class="sale-id">Código Carrinho: #12345</span>
+            <span class="sale-total">Total: R$ 500,00</span>
+            <span class="sale-payment">Pagamento: PIX</span>
+          </div>
+          <div class="sale-products">
+            <div class="products-container">
+              <div class="product-item">
+                <img src="../Fotos/produto1.jpg" alt="Produto 1" class="product-image">
+                <div class="product-info">
+                  <span>Código: 001</span>
+                  <span>Nome: Camiseta Preta</span>
+                  <span>Cores: Preto</span>
+                  <span>Preço: R$ 100,00</span>
+                  <span>Tamanho: M</span>
+                </div>
+              </div>
+              <div class="product-item">
+                <img src="../Fotos/produto2.jpg" alt="Produto 2" class="product-image">
+                <div class="product-info">
+                  <span>Código: 002</span>
+                  <span>Nome: Calça Jeans</span>
+                  <span>Cores: Azul</span>
+                  <span>Preço: R$ 150,00</span>
+                  <span>Tamanho: 42</span>
+                </div>
+              </div>
+              <div class="product-item">
+                <img src="../Fotos/produto3.jpg" alt="Produto 3" class="product-image">
+                <div class="product-info">
+                  <span>Código: 003</span>
+                  <span>Nome: Tênis Esportivo</span>
+                  <span>Cores: Branco</span>
+                  <span>Preço: R$ 250,00</span>
+                  <span>Tamanho: 40</span>
+                </div>
+              </div>
+              <div class="product-item">
+                <img src="../Fotos/produto4.jpg" alt="Produto 4" class="product-image">
+                <div class="product-info">
+                  <span>Código: 004</span>
+                  <span>Nome: Jaqueta de Couro</span>
+                  <span>Cores: Preto</span>
+                  <span>Preço: R$ 500,00</span>
+                  <span>Tamanho: G</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="sale-status">
+            <label for="status">Data limite de entrega: 11/04/2025</label>
+            <label for="status">Status:</label>
+            <select id="status" class="status-select">
+              <option value="Pago">Pago</option>
+              <option value="Produto Enviado">Produto Enviado</option>
+            </select>
+            <button class="save-button" onclick="confirmSend()">Salvar</button>
+            <button class="details-button" onclick="showCustomerDetails()">Ver detalhes do cliente</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="confirmation-modal" class="modal">
+    <div class="modal-content">
+      <p>Deseja realmente confirmar o envio do produto?</p>
+      <button onclick="confirmAction()">Confirmar</button>
+      <button onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="customer-details-modal" class="modal">
+    <div class="modal-content">
+      <h2>Detalhes do Cliente</h2>
+      <p><strong>Nome:</strong> João Silva</p>
+      <p><strong>CPF:</strong> 123.456.789-00</p>
+      <p><strong>Endereço:</strong></p>
+      <p>Rua das Flores, 123</p>
+      <p>Bairro: Centro</p>
+      <p>Cidade: São Paulo</p>
+      <p>Complemento: Apt 101</p>
+      <button onclick="closeCustomerDetailsModal()">Fechar</button>
+    </div>
+  </div>
+
+  <script src="../JS/controle-vendas-java.js"></script>
+</body>
+</html> 
