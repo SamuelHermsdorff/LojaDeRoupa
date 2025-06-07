@@ -1,35 +1,107 @@
 <?php
+// Garante que nenhum output é enviado antes do JSON
+ob_start();
+
 session_start();
-header('Content-Type: application/json');
-require 'db_connect.php'; 
+header('Content-Type: application/json; charset=utf-8');
 
-// Verifique se o usuário está logado
-if (!isset($_SESSION['usuario_logado'])) {
-    echo json_encode(['erro' => 'Usuário não logado.']);
-    exit();
-}
+// Configuração de erro detalhada
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', 'php_errors.log');
 
-// Obtendo os dados do carrinho
-$carrinho = json_decode($_POST['carrinho'], true); // Recebe o carrinho como JSON
+require 'db_connect.php';
 
-$nome_cliente = $_SESSION['usuario']['nome'];
-$cpf_cliente = $_SESSION['usuario']['cpf'];
-$email_cliente = $_SESSION['usuario']['email'];
-$telefone_cliente = $_SESSION['usuario']['telefone'];
-$usuario_id = $_SESSION['usuario']['id']; // ID do usuário logado
+try {
+    // Verifica método HTTP
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception("Método não permitido", 405);
+    }
 
+    // Verifica autenticação
+    if (!isset($_SESSION['usuario_logado'])) {
+        throw new Exception("Não autenticado", 401);
+    }
 
-// Preparando os dados para salvar no banco
-$produtos = json_encode($carrinho); // Salva os produtos como um JSON
-$data_pedido = date('Y-m-d H:i:s'); // Data e hora atual
+    // Lê os dados de entrada
+    $input = file_get_contents('php://input');
+    if (empty($input)) {
+        throw new Exception("Nenhum dado recebido", 400);
+    }
 
-// Insere o pedido no banco
-$query = "INSERT INTO Pedidos (nome_cliente, cpf_cliente, email_cliente, telefone_cliente, produtos, data_pedido, usuario_id)
-          VALUES ('$nome_cliente', '$cpf_cliente', '$email_cliente', '$telefone_cliente', '$produtos', '$data_pedido', '$usuario_id')";
+    // Decodifica o JSON
+    $data = json_decode($input, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception("JSON inválido: " . json_last_error_msg(), 400);
+    }
 
-if (mysqli_query($conn, $query)) {
-    echo json_encode(["status" => "sucesso", "mensagem" => "Pedido Realizado com sucesso!"]);
-} else {
-    echo json_encode(["status" => "erro", "mensagem" => "Falha ao realizar pedido."]);
+    // Valida o carrinho
+    if (empty($data['carrinho']) || !is_array($data['carrinho'])) {
+        throw new Exception("Carrinho inválido", 400);
+    }
+
+    // Prepara os produtos
+    $produtos = array();
+    foreach ($data['carrinho'] as $item) {
+        $produtos[] = array(
+            'id' => intval($item['id'] ?? 0),
+            'nome' => substr($item['nome'] ?? 'Produto sem nome', 0, 255),
+            'preco' => floatval($item['preco'] ?? 0),
+            'quantidade' => intval($item['quantidade'] ?? 1)
+        );
+    }
+
+    // Prepara a query SQL
+    $query = "INSERT INTO Pedidos (
+        nome_cliente, cpf_cliente, email_cliente, telefone_cliente, 
+        produtos, data_pedido, status, usuario_id
+    ) VALUES (?, ?, ?, ?, ?, NOW(), 'A pagar', ?)";
+
+    $stmt = $conn->prepare($query);
+    if (!$stmt) {
+        throw new Exception("Erro ao preparar consulta: " . $conn->error, 500);
+    }
+
+    $produtosJson = json_encode($produtos, JSON_UNESCAPED_UNICODE);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception("Erro ao codificar produtos", 500);
+    }
+
+    $stmt->bind_param(
+        "sssssi",
+        $_SESSION['usuario']['nome'],
+        $_SESSION['usuario']['cpf'],
+        $_SESSION['usuario']['email'],
+        $_SESSION['usuario']['telefone'],
+        $produtosJson,
+        $_SESSION['usuario']['id']
+    );
+
+    if (!$stmt->execute()) {
+        throw new Exception("Erro ao executar consulta: " . $stmt->error, 500);
+    }
+
+    // Limpa qualquer output potencial
+    ob_end_clean();
+
+    // Retorna sucesso
+    echo json_encode([
+        'status' => 'sucesso',
+        'pedido_id' => $conn->insert_id,
+        'mensagem' => 'Pedido criado com sucesso'
+    ]);
+
+} catch (Exception $e) {
+    // Limpa buffers antes do erro
+    while (ob_get_level()) ob_end_clean();
+    
+    http_response_code($e->getCode() ?: 500);
+    echo json_encode([
+        'status' => 'erro',
+        'mensagem' => $e->getMessage()
+    ]);
+} finally {
+    if (isset($conn)) $conn->close();
 }
 ?>

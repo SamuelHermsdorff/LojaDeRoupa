@@ -25,6 +25,17 @@
       <button class="adicionar-produto" onclick="window.location.href='catalogo.php'">Selecionar Mais Produtos</button>
     </div>
 
+    <!-- Adicione isso antes do fechamento do </body> -->
+    <div id="confirmation-remove-modal" class="confirmation-modal">
+        <div class="confirmation-content">
+            <h3>Tem certeza que deseja remover este produto?</h3>
+            <div class="confirmation-buttons">
+                <button id="confirmar-remocao">Sim</button>
+                <button id="cancelar-remocao">Não</button>
+            </div>
+        </div>
+    </div>
+
     <div class="pagamento-container">
       <h3>Forma de Pagamento:</h3>
       <div class="opcao-pix">

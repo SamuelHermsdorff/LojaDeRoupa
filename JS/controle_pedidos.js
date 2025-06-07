@@ -5,7 +5,7 @@ async function carregarPedidos() {
   try {
     const response = await fetch('../PHP/listar_pedidos.php', {
       method: 'GET',
-      credentials: 'include',  // Incluindo credenciais da sessão (cookies)
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -13,46 +13,71 @@ async function carregarPedidos() {
     }
 
     const pedidos = await response.json();
-    //console.log('Pedidos recebidos:', pedidos);
-
+    
     if (pedidos.length === 0) {
       noPedidosMessage.style.display = 'block';
       return;
     }
 
-    // Certifique-se de que pedidos é um array antes de usar .forEach
     if (Array.isArray(pedidos)) {
-      pedidos.forEach(pedido => {
-        // Verifique se 'pedido.produtos' é uma string antes de usar JSON.parse()
-        const produtos = typeof pedido.produtos === 'string' ? JSON.parse(pedido.produtos) : pedido.produtos;
+        pedidos.forEach(pedido => {
+            // Dentro da função carregarPedidos(), modifique a parte de processamento dos produtos:
+            let produtos = [];
+            try {
+                if (pedido.produtos) {
+                    // Se já for array, usa diretamente
+                    if (Array.isArray(pedido.produtos)) {
+                        produtos = pedido.produtos;
+                    } 
+                    // Se for string, tenta parsear
+                    else if (typeof pedido.produtos === 'string') {
+                        // Remove possíveis caracteres problemáticos
+                        const produtosStr = pedido.produtos.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+                        produtos = JSON.parse(produtosStr);
+                    }
+                    
+                    // Filtra produtos inválidos
+                    produtos = produtos.filter(p => p && p.nome && p.preco);
+                }
+            } catch (e) {
+                console.error(`Erro ao processar produtos do pedido ${pedido.id}:`, e);
+                produtos = [];
+            }
 
-        const pedidoItem = document.createElement('div');
-        pedidoItem.className = 'pedido-item';
-        pedidoItem.innerHTML = `
-          <div class="pedido-header">
-            <div class="pedido-info">
-              <span>Código: #${pedido.id}</span>
-              <span>Data: ${formatarDataHora(pedido.data_pedido)}</span>
-              <span>Status: 
-                <select onchange="alterarStatus(${pedido.id}, this.value)" class="status-select">
-                  <option value="A pagar" ${pedido.status === 'A pagar' ? 'selected' : ''}>A pagar</option>
-                  <option value="Pago" ${pedido.status === 'Pago' ? 'selected' : ''}>Pago</option>
-                  <option value="Enviado" ${pedido.status === 'Enviado' ? 'selected' : ''}>Enviado</option>
-                  <option value="Aguardando" ${pedido.status === 'Aguardando' ? 'selected' : ''}>Aguardando contato</option>
-                </select>
-              </span>
-            </div>
-          </div>
-          <div class="pedido-produtos">
-            <h4>Produtos</h4>
-            <ul>
-              ${produtos.map(produto => `
-                <li>${produto.nome} - R$ ${parseFloat(produto.preco).toFixed(2).replace('.', ',')}</li>
-              `).join('')}
-            </ul>
-          </div>
-        `;
-        pedidosList.appendChild(pedidoItem);
+            // Garante que é um array
+            if (!Array.isArray(produtos)) {
+                produtos = [];
+            }
+
+            const pedidoItem = document.createElement('div');
+            pedidoItem.className = 'pedido-item';
+            pedidoItem.innerHTML = `
+              <div class="pedido-header">
+                <div class="pedido-info">
+                  <span>Código: #${pedido.id}</span>
+                  <span>Data: ${formatarDataHora(pedido.data_pedido)}</span>
+                  <span>Status: 
+                    <select onchange="alterarStatus(${pedido.id}, this.value)" class="status-select">
+                      <option value="A pagar" ${pedido.status === 'A pagar' ? 'selected' : ''}>A pagar</option>
+                      <option value="Pago" ${pedido.status === 'Pago' ? 'selected' : ''}>Pago</option>
+                      <option value="Enviado" ${pedido.status === 'Enviado' ? 'selected' : ''}>Enviado</option>
+                      <option value="Aguardando" ${pedido.status === 'Aguardando' ? 'selected' : ''}>Aguardando contato</option>
+                    </select>
+                  </span>
+                </div>
+              </div>
+              <div class="pedido-produtos">
+                <h4>Produtos</h4>
+                <ul>
+                  ${produtos.length > 0 ? 
+                    produtos.map(produto => `
+                      <li>${produto.nome} - R$ ${parseFloat(produto.preco).toFixed(2).replace('.', ',')}</li>
+                    `).join('') 
+                    : '<li>Nenhum produto listado</li>'}
+                </ul>
+              </div>
+            `;
+            pedidosList.appendChild(pedidoItem);
       });
     } else {
       console.error('Resposta inválida: pedidos não é um array');

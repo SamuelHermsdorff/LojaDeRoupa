@@ -32,35 +32,92 @@ document.querySelectorAll(".quantidade-input").forEach(input => {
     input.addEventListener("input", calcularPrecoTotal);
 });
 
-function confirmarPagamento() {
+async function confirmarPagamento() {
     const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
-
+    
     if (carrinho.length === 0) {
         enviarMensagemAjax("Carrinho vazio.", "erro");
         return;
     }
 
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "../PHP/criar_pedido.php", true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    //
-    const dados = new URLSearchParams();
-    dados.append('carrinho', JSON.stringify(carrinho)); // Enviar o carrinho como JSON
+    // Prepara os dados no formato correto
+    const dadosPedido = {
+        carrinho: carrinho.map(item => ({
+            id: item.id,
+            nome: item.nome,
+            preco: item.preco,
+            quantidade: item.quantidade || item.quantity || 1
+        }))
+    };
 
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            enviarMensagemAjax("Pedido Realizado com sucesso!", "sucesso");
+    try {
+        //console.log("Enviando dados:", dadosPedido); // Debug
+        
+        const response = await fetch('../PHP/criar_pedido.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(dadosPedido),
+            credentials: 'include'
+        });
+
+        //console.log("Resposta recebida:", response); // Debug
+
+        // Verifica se a resposta está vazia
+        const responseText = await response.text();
+        //console.log("Conteúdo da resposta:", responseText); // Debug
+
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        // Tenta parsear apenas se houver conteúdo
+        const data = responseText ? JSON.parse(responseText) : {};
+        
+        if (data.status === 'sucesso') {
+            enviarMensagemAjax("Pedido realizado com sucesso!", "sucesso");
             localStorage.removeItem('carrinho');
-            setTimeout(function() {
+            setTimeout(() => {
                 window.location.href = "../HTML/contato_loja.php";
             }, 500);
         } else {
-            enviarMensagemAjax("Falha ao realizar pedido.", "erro");
+            throw new Error(data.mensagem || 'Erro desconhecido');
         }
-    };
-
-    xhr.send(dados);
+    } catch (error) {
+        console.error('Erro detalhado:', error);
+        enviarMensagemAjax("Falha ao finalizar pedido. Tente novamente.", "erro");
+    }
 }
+//function confirmarPagamento() {
+//    const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+//
+//    if (carrinho.length === 0) {
+//        enviarMensagemAjax("Carrinho vazio.", "erro");
+//        return;
+//    }
+//
+//    const xhr = new XMLHttpRequest();
+//    xhr.open("POST", "../PHP/criar_pedido.php", true);
+//    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+//    //
+//    const dados = new URLSearchParams();
+//    dados.append('carrinho', JSON.stringify(carrinho)); // Enviar o carrinho como JSON
+//
+//    xhr.onload = function() {
+//        if (xhr.status === 200) {
+//            enviarMensagemAjax("Pedido Realizado com sucesso!", "sucesso");
+//            localStorage.removeItem('carrinho');
+//            setTimeout(function() {
+//                window.location.href = "../HTML/contato_loja.php";
+//            }, 500);
+//        } else {
+//            enviarMensagemAjax("Falha ao realizar pedido.", "erro");
+//        }
+//    };
+//
+//    xhr.send(dados);
+//}
 
 function abrirModalSalvar() {
     document.getElementById("confirmation-salvar-modal").style.display = "flex";
@@ -98,7 +155,6 @@ function formatarPreco(valor) {
   return valor.toFixed(2).replace('.', ',');
 }
 
-// Carrega os produtos do carrinho
 function carregarCarrinho() { 
   const carrinhoItens = document.getElementById('carrinho-itens');
   const precoTotalEl = document.getElementById('preco-total');
@@ -129,6 +185,7 @@ function carregarCarrinho() {
         <p><strong>Nome:</strong> ${produto.nome}</p>
         <p><strong>Preço:</strong> R$ ${formatarPreco(produto.preco)}</p>
         <p><strong>Quantidade:</strong> <input type="number" min="1" value="${produto.quantidade}" data-index="${index}" class="quantidade-input"></p>
+        <button class="produto-remover" data-index="${index}">Remover</button>
       </div>
     `;
     carrinhoItens.appendChild(produtoDiv);
@@ -138,12 +195,6 @@ function carregarCarrinho() {
 
   precoTotalEl.textContent = formatarPreco(precoTotal);
 
-
-  // Coloca data atual no carrinho
-  //const hoje = new Date();
-  //const dataFormatada = hoje.toLocaleDateString('pt-BR');
-  //dataCarrinhoEl.textContent = dataFormatada;
-
   // Atualiza preço total se mudar a quantidade
   const inputsQuantidade = document.querySelectorAll('.quantidade-input');
   inputsQuantidade.forEach(input => {
@@ -151,11 +202,45 @@ function carregarCarrinho() {
       const index = e.target.getAttribute('data-index');
       carrinho[index].quantidade = parseInt(e.target.value);
       localStorage.setItem('carrinho', JSON.stringify(carrinho));
-      carregarCarrinho(); // recarrega para atualizar o preço total
+      carregarCarrinho();
+    });
+  });
+
+  // Adiciona eventos para os botões de remover
+  const botoesRemover = document.querySelectorAll('.produto-remover');
+  botoesRemover.forEach(botao => {
+    botao.addEventListener('click', (e) => {
+      const index = e.target.getAttribute('data-index');
+      abrirModalRemover(index);
     });
   });
 }
 
+// Nova função para remover produto
+function removerProduto(index) {
+  let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+  
+  if (index >= 0 && index < carrinho.length) {
+    carrinho.splice(index, 1);
+    localStorage.setItem('carrinho', JSON.stringify(carrinho));
+    carregarCarrinho();
+    enviarMensagemAjax("Produto removido do carrinho.", "sucesso");
+  }
+}
+
+function removerProduto(index) {
+  // Modal de confirmação
+  if (confirm("Tem certeza que deseja remover este produto do carrinho?")) {
+    let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+    
+    if (index >= 0 && index < carrinho.length) {
+      carrinho.splice(index, 1);
+      localStorage.setItem('carrinho', JSON.stringify(carrinho));
+      carregarCarrinho();
+      enviarMensagemAjax("Produto removido do carrinho.", "sucesso");
+    }
+  }
+}
 document.addEventListener('DOMContentLoaded', carregarCarrinho);
 
 function enviarMensagemAjax(mensagem, tipo) {
@@ -170,3 +255,45 @@ function enviarMensagemAjax(mensagem, tipo) {
         mensagemContainer.innerHTML = '';
     }, 3000);
 }
+// Variável para armazenar o índice do produto a ser removido
+let produtoIndexParaRemover = null;
+
+// Função para abrir o modal de remoção
+function abrirModalRemover(index) {
+    produtoIndexParaRemover = index;
+    document.getElementById("confirmation-remove-modal").classList.add("active");
+}
+
+// Função para fechar o modal de remoção
+function fecharModalRemover() {
+    document.getElementById("confirmation-remove-modal").classList.remove("active");
+    produtoIndexParaRemover = null;
+}
+
+// Função para remover o produto após confirmação
+function confirmarRemocao() {
+    if (produtoIndexParaRemover !== null) {
+        let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+        
+        if (produtoIndexParaRemover >= 0 && produtoIndexParaRemover < carrinho.length) {
+            carrinho.splice(produtoIndexParaRemover, 1);
+            localStorage.setItem('carrinho', JSON.stringify(carrinho));
+            carregarCarrinho();
+            enviarMensagemAjax("Produto removido do carrinho.", "sucesso");
+        }
+    }
+    fecharModalRemover();
+}
+
+// Adicione os event listeners para os botões do modal
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('confirmar-remocao').addEventListener('click', confirmarRemocao);
+    document.getElementById('cancelar-remocao').addEventListener('click', fecharModalRemover);
+    
+    // Fechar o modal ao clicar fora do conteúdo
+    document.getElementById('confirmation-remove-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            fecharModalRemover();
+        }
+    });
+});

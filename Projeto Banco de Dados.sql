@@ -19,7 +19,7 @@ CREATE TABLE Pedidos (
     cpf_cliente VARCHAR(14),
     email_cliente VARCHAR(255),
     telefone_cliente VARCHAR(15),
-    produtos TEXT, -- Armazenar como um JSON string para os produtos e quantidades
+    produtos TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
     data_pedido DATETIME,
     status VARCHAR(50) DEFAULT 'A pagar',
     usuario_id INT, -- Referência à tabela de usuários

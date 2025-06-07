@@ -388,3 +388,112 @@ main {
   display: block;
   margin-bottom: 5px;
 }
+
+/* Estilo para o botão de remover */
+.produto-remover {
+  background-color: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 1px;
+  transition: background-color 0.3s;
+}
+
+.produto-remover:hover {
+  background-color: #cc0000;
+}
+
+.produto-info {
+  position: relative;
+}
+
+.confirmation-modal {
+    display: none; /* Isso é essencial - mantém o modal escondido por padrão */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.4);
+    /* Centraliza o conteúdo apenas quando visível */
+    align-items: center;
+    justify-content: center;
+}
+
+/* Adicione esta classe para quando o modal estiver visível */
+.confirmation-modal.active {
+    display: flex;
+}
+
+.confirmation-content {
+    background-color: #fefefe;
+    padding: 25px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    /* Centraliza o modal */
+    margin: auto;
+    position: relative;
+    /* Remove margens que possam estar deslocando */
+    top: auto;
+    left: auto;
+    transform: none;
+}
+
+.confirmation-content h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.confirmation-buttons {
+    margin-top: 25px;
+}
+
+.confirmation-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.confirmation-buttons button:first-child {
+    background-color: #f44336;
+    color: white;
+}
+
+.confirmation-buttons button:first-child:hover {
+    background-color: #d32f2f;
+}
+
+.confirmation-buttons button:last-child {
+    background-color: #ccc;
+    color: #333;
+}
+
+.confirmation-buttons button:last-child:hover {
+    background-color: #bdbdbd;
+}
+
+/* Estilo para o botão de remover nos itens */
+.produto-remover {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.produto-remover:hover {
+    background-color: #d32f2f;
+}
