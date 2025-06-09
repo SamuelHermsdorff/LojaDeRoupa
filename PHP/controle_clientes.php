@@ -153,9 +153,6 @@ function cadastrarUsuario($conn) {
         $email = $conn->real_escape_string($_POST['email']);
         $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT);
         
-        // TODO: dont pass the funcionario
-        //$stmt = $conn->prepare("INSERT INTO Usuarios (nome, cpf, telefone, email, senha, funcionario) VALUES (?, ?, ?, ?, ?, ?)");
-        //$stmt->bind_param("sssssi", $nome, $cpf, $telefone, $email, $senha, $funcionario);
         $stmt = $conn->prepare("INSERT INTO Usuarios (nome, cpf, telefone, email, senha, funcionario) VALUES (?, ?, ?, ?, ?, 0)");
         $stmt->bind_param("sssss", $nome, $cpf, $telefone, $email, $senha);
     }

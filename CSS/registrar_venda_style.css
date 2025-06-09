@@ -407,3 +407,77 @@ h2 {
 .product-card:hover:not(.selected) {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+
+/* --- Novo CSS para Quantidade --- */
+.quantity-control {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centraliza horizontalmente */
+    margin-top: 10px;
+    gap: 5px; /* Espaço entre os botões e o input */
+    background-color: #f0f0f0; /* Fundo suave para o controle */
+    border-radius: 5px;
+    padding: 5px;
+}
+
+.quantity-control button {
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0; /* Evita que o botão encolha */
+}
+
+.quantity-control button:hover {
+    background-color: #b71c1c;
+}
+
+.quantity-control input[type="number"] {
+    width: 60px; /* Largura ajustável para o input */
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+    -moz-appearance: textfield; /* Remove setas padrão do Firefox */
+    flex-grow: 1; /* Permite que o input cresça */
+}
+
+/* Esconde as setas padrão do input number para WebKit */
+.quantity-control input[type="number"]::-webkit-outer-spin-button,
+.quantity-control input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Windows title */
+h3 {
+    color: white;
+    font-size: 18px;
+    margin: 0;
+}
+
+#windowtitle {
+    width: 100%;
+    display: flex;
+    text-align: left;
+}
+
+#inner {
+    text-align: left;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+}

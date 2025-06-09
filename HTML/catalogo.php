@@ -21,6 +21,10 @@ if (!isset($_SESSION['usuario_logado'])) {
       <img src="../Fotos/Logo-Branco.png" alt="Logo Identidade">
       <h1>Identidade</h1>
     </div>
+    <div id="windowtitle">
+        <h3 id="inner">-</h3>
+        <h3>Catálogo</h3>
+    </div>
     <!--<button onclick="window.location.href='carrinho.php'">carrinho</button>-->
     <button class="menu-button" onclick="toggleMenu()">☰</button>
   </header>

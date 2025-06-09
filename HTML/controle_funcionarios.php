@@ -16,15 +16,20 @@ if (!$_SESSION['usuario']['administrador']) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Identidade - Controle de Clientes</title>
+  <title>Identidade - Controle de Funcionários</title>
     <link rel="icon" type="image/x-icon" href="../Fotos/favicon.ico">
-  <link rel="stylesheet" href="../CSS/controle_clientes_style.css">
+  <link rel="stylesheet" href="../CSS/controle_funcionario_style.css">
 </head>
 <body>
   <header>
     <div class="logo">
-      <img src="../Fotos/Logo.png" alt="Logo Identidade">
+      <img src="../Fotos/Logo-Branco.png" alt="Logo Identidade">
       <h1>Identidade</h1>
+    </div>
+
+    <div id="windowtitle">
+        <h3 id="inner">-</h3>
+        <h3>Controle de Funcionários</h3>
     </div>
     <button class="menu-button" onclick="toggleMenu()">☰</button>
   </header>

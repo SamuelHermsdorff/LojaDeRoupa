@@ -2,60 +2,66 @@
 session_start();
 header('Content-Type: application/json');
 
-require "db_connect.php";
+// Inclui o arquivo de conexão com o banco de dados
+require 'db_connect.php';
 
-// Verificação de acesso
-if (!isset($_SESSION['usuario']) || (!$_SESSION['usuario']['funcionario'] && !$_SESSION['usuario']['administrador'])) {
-    echo json_encode(["status" => "erro", "mensagem" => "Acesso negado. Apenas funcionários podem acessar esta página."]);
+// Verifica se o usuário está logado e tem permissão (funcionário ou administrador)
+if (!isset($_SESSION['usuario_logado']) || (!$_SESSION['usuario']['funcionario'] && !$_SESSION['usuario']['administrador'])) {
+    http_response_code(401); // Não autorizado
+    echo json_encode(["erro" => "Acesso não autorizado. Permissão insuficiente."]);
     exit();
 }
 
-// Consulta para listar todos os pedidos
-$query = "SELECT id, data_pedido, status, produtos FROM Pedidos";
-$result = mysqli_query($conn, $query);
-
-if (!$result) {
-    echo json_encode(["status" => "erro", "mensagem" => "Erro ao consultar pedidos: " . mysqli_error($conn)]);
-    exit();
-}
-
-$pedidos = [];
-while ($row = mysqli_fetch_assoc($result)) {
-    // Tratamento robusto para o campo produtos
-    $produtos = [];
+try {
+    // Busca todos os pedidos, incluindo informações do cliente e dados de pagamento
+    // A chave usuario_id na tabela Pedidos faz referência ao id na tabela Usuarios
+    $sql = "SELECT 
+                p.id, 
+                p.nome_cliente, 
+                p.cpf_cliente, 
+                p.email_cliente, 
+                p.telefone_cliente, 
+                p.produtos, 
+                p.data_pedido, 
+                p.status,
+                p.forma_pagamento, 
+                p.valor_total
+            FROM 
+                Pedidos p
+            ORDER BY 
+                p.data_pedido DESC"; // Ordena do mais recente para o mais antigo
     
-    if (!empty($row['produtos'])) {
-        // Remove possíveis caracteres inválidos antes de decodificar
-        $produtosData = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $row['produtos']);
-        
-        // Tenta decodificar o JSON
-        $decoded = json_decode($produtosData, true);
-        
-        if (json_last_error() === JSON_ERROR_NONE) {
-            $produtos = $decoded;
-        } else {
-            // Log do erro para debug (remova em produção)
-            error_log("Erro ao decodificar produtos do pedido {$row['id']}: " . json_last_error_msg());
-            error_log("Conteúdo original: " . substr($row['produtos'], 0, 100));
-        }
+    $stmt = $conn->prepare($sql);
+    
+    if (!$stmt) {
+        throw new Exception("Erro ao preparar a consulta SQL: " . $conn->error);
     }
-    
-    // Filtra e sanitiza os produtos
-    $produtosSanitizados = [];
-    foreach ($produtos as $produto) {
-        $produtoSanitizado = [
-            'nome' => isset($produto['nome']) ? htmlspecialchars($produto['nome']) : 'Produto sem nome',
-            'preco' => isset($produto['preco']) ? floatval($produto['preco']) : 0,
-            // Remove a imagem da serialização se existir (ou sanitiza se necessário)
-            'imagem' => isset($produto['imagem']) ? null : null
-        ];
-        $produtosSanitizados[] = $produtoSanitizado;
-    }
-    
-    $row['produtos'] = $produtosSanitizados;
-    $pedidos[] = $row;
-}
 
-// Retorne os pedidos como um array JSON
-echo json_encode($pedidos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $pedidos = [];
+    while ($row = $result->fetch_assoc()) {
+        // Converte a string JSON de produtos de volta para um array/objeto PHP
+        // Se a coluna 'produtos' estiver vazia ou não for JSON válido, usará um array vazio
+        $row['produtos'] = json_decode($row['produtos'], true) ?? [];
+        
+        // Garante que 'forma_pagamento' e 'valor_total' tenham valores padrão se forem nulos no banco
+        $row['forma_pagamento'] = $row['forma_pagamento'] ?? 'Não especificado';
+        $row['valor_total'] = floatval($row['valor_total'] ?? 0); // Garante que seja um float
+
+        $pedidos[] = $row;
+    }
+
+    echo json_encode($pedidos);
+
+} catch (Exception $e) {
+    error_log("Erro ao listar pedidos no controle: " . $e->getMessage());
+    http_response_code(500); // Erro interno do servidor
+    echo json_encode(["erro" => "Erro ao carregar pedidos: " . $e->getMessage()]);
+} finally {
+    if (isset($conn)) {
+        $conn->close();
+    }
+}
 ?>

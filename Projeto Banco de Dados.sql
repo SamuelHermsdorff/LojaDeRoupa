@@ -22,6 +22,8 @@ CREATE TABLE Pedidos (
     produtos TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
     data_pedido DATETIME,
     status VARCHAR(50) DEFAULT 'A pagar',
+    forma_pagamento VARCHAR(50) NULL DEFAULT 'Não especificado',
+    valor_total NUMERIC(10, 2) NULL,
     usuario_id INT, -- Referência à tabela de usuários
     FOREIGN KEY (usuario_id) REFERENCES Usuarios (id) -- Define a chave estrangeira
 );

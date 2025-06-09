@@ -1,4 +1,3 @@
-
 let pedidos = []; // Array para armazenar todos os pedidos carregados
 
 async function carregarPedidos() {
@@ -8,27 +7,26 @@ async function carregarPedidos() {
     try {
         const response = await fetch('../PHP/minhas_compras.php', {
             method: 'GET',
-            credentials: 'include',    // Incluindo credenciais da sessão (cookies)
+            credentials: 'include',
         });
 
-        // Verificando se a resposta não é ok
         if (!response.ok) {
             throw new Error('Erro ao buscar pedidos');
         }
 
-        // Aqui, verificamos o tipo da resposta antes de tentar fazer o JSON.parse
         const textResponse = await response.text();
-        //console.log(textResponse);    // Verifique o conteúdo da resposta no console
 
-        // Agora, tentamos fazer o JSON.parse() apenas se a resposta for JSON
         try {
-            pedidos = JSON.parse(textResponse); // Salva todos os pedidos na variável pedidos
+            pedidos = JSON.parse(textResponse); 
             if (pedidos.length === 0) {
                 noOrdersMessage.style.display = 'block';
+                salesList.innerHTML = ''; // Garante que a lista está vazia
                 return;
             }
 
-            exibirPedidos(pedidos); // Exibe todos os pedidos inicialmente
+            // Garante que a mensagem de "nenhum pedido" esteja escondida se houver pedidos
+            noOrdersMessage.style.display = 'none';
+            exibirPedidos(pedidos);
 
         } catch (error) {
             console.error('Erro ao fazer o JSON.parse():', error);
@@ -43,13 +41,22 @@ async function carregarPedidos() {
     }
 }
 
-// Função para exibir os pedidos
 function exibirPedidos(pedidosFiltrados) {
     const salesList = document.getElementById('sales-list');
-    salesList.innerHTML = ''; // Limpa a lista de pedidos antes de adicionar os novos
+    salesList.innerHTML = ''; 
 
     pedidosFiltrados.forEach(pedido => {
-        const produtos = JSON.parse(pedido.produtos);
+        // Certifique-se de que `pedido.produtos` é um JSON string e tenta parsear
+        let produtos = [];
+        try {
+            produtos = JSON.parse(pedido.produtos);
+            if (!Array.isArray(produtos)) { // Garante que é um array, mesmo que vazio
+                produtos = [];
+            }
+        } catch (e) {
+            console.error("Erro ao parsear JSON de produtos para o pedido ID:", pedido.id, e);
+            produtos = []; // Reseta para array vazio em caso de erro de parse
+        }
 
         const saleItem = document.createElement('div');
         saleItem.className = 'sale-item';
@@ -62,11 +69,11 @@ function exibirPedidos(pedidosFiltrados) {
                     </div>
                     <div class="sale-info-item">
                         <span class="sale-info-label">Total</span>
-                        <span class="sale-info-value">R$ ${calcularTotal(produtos)}</span>
+                        <span class="sale-info-value">R$ ${formatarValor(pedido.valor_total || calcularTotalAntigo(produtos))}</span>
                     </div>
                     <div class="sale-info-item">
                         <span class="sale-info-label">Forma de Pagamento</span>
-                        <span class="sale-info-value">PIX</span>
+                        <span class="sale-info-value">${pedido.forma_pagamento || 'Aguardando contato'}</span>
                     </div>
                     <div class="sale-info-item">
                         <span class="sale-info-label">Contato da Loja</span>
@@ -77,18 +84,17 @@ function exibirPedidos(pedidosFiltrados) {
 
             <div class="sale-products">
                 <div class="products-container">
-                    ${produtos.map(produto => `
+                    ${produtos.length > 0 ? produtos.map(produto => `
                         <div class="product-item">
                             <img src="data:image/jpeg;base64,${produto.imagem || ''}" alt="${produto.nome}" class="product-image">
                             <div class="product-info">
-                                <span>Código: ${produto.codigo}</span>
-                                <span>Nome: ${produto.nome}</span>
-                                <span>Cores: ${produto.cor}</span>
-                                <span>Preço: R$ ${parseFloat(produto.preco).toFixed(2).replace('.', ',')}</span>
-                                <span>Tamanho: ${produto.tamanho}</span>
-                            </div>
+                                <span>Código: ${produto.codigo_produto || 'N/A'}</span>
+                                <span>Nome: ${produto.nome || 'N/A'}</span>
+                                <span>Quantidade: ${produto.quantidade || 1}</span> <span>Preço Unitário: R$ ${formatarValor(produto.preco || 0)}</span> <span>Cores: ${produto.cor || 'N/A'}</span>
+                                <span>Tamanho: ${produto.tamanho || 'N/A'}</span>
+                                </div>
                         </div>
-                    `).join('')}
+                    `).join('') : '<p>Nenhum produto detalhado encontrado para este pedido.</p>'}
                 </div>
             </div>
 
@@ -104,6 +110,7 @@ function exibirPedidos(pedidosFiltrados) {
                         <option value="Pago" ${pedido.status === 'Pago' ? 'selected' : ''}>Pago</option>
                         <option value="Enviado" ${pedido.status === 'Enviado' ? 'selected' : ''}>Produto Enviado</option>
                         <option value="Aguardando" ${pedido.status === 'Aguardando' ? 'selected' : ''}>Aguardando contato</option>
+                        <option value="Cancelado" ${pedido.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
                     </select>
                 </div>
             </div>
@@ -122,16 +129,11 @@ function filterByDate() {
         return;
     }
 
-    // Convertendo para Date e zerando horas
     const start = new Date(startDate + 'T00:00:00');
-    const end = new Date(endDate + 'T23:59:59'); // inclui todo o dia final
+    const end = new Date(endDate + 'T23:59:59');
 
     const pedidosFiltrados = pedidos.filter(pedido => {
         const pedidoData = new Date(pedido.data_pedido);
-
-        // console.log para debug
-        //console.log(`Comparando: ${pedidoData} entre ${start} e ${end}`);
-
         return pedidoData >= start && pedidoData <= end;
     });
 
@@ -140,21 +142,19 @@ function filterByDate() {
     if (pedidosFiltrados.length === 0) {
         noOrdersMessage.style.display = 'block';
         document.getElementById('sales-list').innerHTML = '';
+        enviarMensagemAjax(`Nenhum pedido encontrado no período de ${formatDate(startDate)} a ${formatDate(endDate)}.`, "erro");
     } else {
         noOrdersMessage.style.display = 'none';
         exibirPedidos(pedidosFiltrados);
+        enviarMensagemAjax(`Filtro aplicado: De ${formatDate(startDate)} até ${formatDate(endDate)}`, 'sucesso');
     }
-
-    //console.log(`Filtrando de ${startDate} até ${endDate}`);
-    enviarMensagemAjax(`Filtro aplicado: De ${formatDate(startDate)} até ${formatDate(endDate)}`, 'sucesso');
 }
 
 function resetFilter() {
     document.getElementById("start-date").value = "";
     document.getElementById("end-date").value = "";
-    document.getElementById('no-orders-message').style.display = 'none'; // Esconde a mensagem de nenhum pedido
-    exibirPedidos(pedidos); // Exibe todos os pedidos novamente
-    //console.log("Filtro resetado");
+    document.getElementById('no-orders-message').style.display = 'none';
+    exibirPedidos(pedidos); 
     enviarMensagemAjax("Filtro resetado.", "sucesso");
 }
 
@@ -163,11 +163,24 @@ function formatDate(dateString) {
     return date.toLocaleDateString('pt-BR');
 }
 
-function calcularTotal(produtos) {
+// Funções para calcular e formatar valores
+
+// Função para formatar qualquer valor monetário
+function formatarValor(valor) {
+    return parseFloat(valor).toFixed(2).replace('.', ',');
+}
+
+// Função para calcular o total de produtos se o valor_total não estiver disponível no pedido (compatibilidade)
+function calcularTotalAntigo(produtos) {
     let total = 0;
-    produtos.forEach(p => {
-        total += parseFloat(p.preco);
-    });
+    // Verifica se produtos é um array válido e não está vazio
+    if (Array.isArray(produtos) && produtos.length > 0) {
+        produtos.forEach(p => {
+            // Se `quantidade` for um campo no JSON do produto, use-o
+            const quantidade = p.quantidade ? parseInt(p.quantidade) : 1; 
+            total += (parseFloat(p.preco) || 0) * quantidade; // Garante que preco é um número
+        });
+    }
     return total.toFixed(2).replace('.', ',');
 }
 
@@ -183,16 +196,12 @@ function formatarDataHora(dataHora) {
 
 function enviarMensagemAjax(mensagem, tipo) {
     const mensagemContainer = document.getElementById('mensagem');
-
-    // Verifica o tipo da mensagem (sucesso ou erro)
-    if (tipo === "sucesso") {
-            mensagemContainer.innerHTML = `<div class="mensagem sucesso">${mensagem}</div>`;
-    } else {
-            mensagemContainer.innerHTML = `<div class="mensagem erro">${mensagem}</div>`;
-    }
-
-    // Exibe a mensagem por 3 segundos e depois a oculta
+    mensagemContainer.innerHTML = '';
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `mensagem ${tipo}`;
+    msgDiv.textContent = mensagem;
+    mensagemContainer.appendChild(msgDiv);
     setTimeout(() => {
-            mensagemContainer.innerHTML = '';
-    }, 800);
+        msgDiv.remove();
+    }, 1500); // Ajustei o tempo para 1.5 segundos para ser menos intrusivo
 }

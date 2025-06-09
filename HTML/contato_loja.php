@@ -11,7 +11,7 @@ if (!isset($_SESSION['usuario_logado'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contato via WhatsApp</title>
+    <title>Identidade - Contato via WhatsApp</title>
     <link rel="icon" type="image/x-icon" href="../Fotos/favicon.ico">
     <link rel="stylesheet" href="../CSS/contato_loja.css">
 </head>
@@ -21,6 +21,10 @@ if (!isset($_SESSION['usuario_logado'])) {
     <div class="logo">
       <img src="../Fotos/Logo-Branco.png" alt="Logo Identidade">
         <h1>Identidade</h1>
+    </div>
+    <div id="windowtitle">
+        <h3 id="inner">-</h3>
+        <h3>Contato via WhatsApp</h3>
     </div>
     <button class="menu-button" onclick="toggleMenu()">☰</button>
   </header>

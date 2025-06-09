@@ -1,4 +1,3 @@
-
 // Carregar produtos ao iniciar a página
 document.addEventListener("DOMContentLoaded", () => {
     // Configurar formatadores
@@ -15,6 +14,9 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // Configurar data atual
     setCurrentDate();
+
+    // Adicionar listener para o select de parcelas
+    document.getElementById("installment-select").addEventListener("change", updateOrderSummary);
 });
 
 // Funções do menu (mantidas conforme original)
@@ -48,7 +50,8 @@ async function carregarProdutos() {
         // Converter preços para número e armazenar
         produtosDisponiveis = produtos.map(produto => ({
             ...produto,
-            preco: parseFloat(produto.preco)
+            preco: parseFloat(produto.preco),
+            quant_estoque: parseInt(produto.quant_estoque) // Garante que estoque é um número
         }));
         
         // Exibir produtos
@@ -59,6 +62,7 @@ async function carregarProdutos() {
         enviarMensagemAjax("Erro ao carregar produtos", "erro");
     }
 }
+
 // Atualize a função exibirProdutos para garantir que os eventos são registrados
 function exibirProdutos(produtos) {
     const container = document.getElementById('products-container');
@@ -77,10 +81,11 @@ function exibirProdutos(produtos) {
         card.dataset.name = produto.nome.toLowerCase();
         card.dataset.gender = produto.genero;
         card.dataset.type = produto.tipo.toLowerCase();
-        
+        card.dataset.stock = produto.quant_estoque; // Armazena o estoque disponível no dataset
+
         card.innerHTML = `
-            <img src="${produto.imagem ? 'data:image/jpeg;base64,'+produto.imagem : '../Fotos/placeholder.jpg'}" 
-                 alt="${produto.nome}" class="product-image">
+            <img src="${produto.imagem ? 'data:image/jpeg;base64,'+produto.imagem : ''}" 
+                    alt="${produto.nome}" class="product-image">
             <div class="product-info">
                 <h3>${produto.nome}</h3>
                 <p>Gênero: ${produto.genero}</p>
@@ -88,59 +93,78 @@ function exibirProdutos(produtos) {
                 <p>Tamanhos: ${produto.tamanho}</p>
                 <p class="product-price">R$ ${produto.preco.toFixed(2)}</p>
                 <p class="availability ${produto.quant_estoque > 0 ? 'available' : 'unavailable'}">
-                    ${produto.quant_estoque > 0 ? 'Disponível' : 'Esgotado'}
+                    ${produto.quant_estoque > 0 ? `Disponível (${produto.quant_estoque} no estoque)` : 'Esgotado'}
                 </p>
+                <div class="quantity-control hidden">
+                    <button class="quantity-decrease">-</button>
+                    <input type="number" value="1" min="1" max="${produto.quant_estoque}" class="product-quantity" readonly>
+                    <button class="quantity-increase">+</button>
+                </div>
             </div>
         `;
         
-        // Evento de clique modificado
-        card.addEventListener('click', function() {
-            toggleProductSelection(this);
+        // Evento de clique modificado para toggleProductSelection
+        card.addEventListener('click', function(event) {
+            // Verifica se o clique não foi nos botões de quantidade ou no input
+            if (!event.target.closest('.quantity-control')) {
+                toggleProductSelection(this);
+            }
         });
+
+        // Adiciona event listeners para os botões de quantidade e input
+        const quantityInput = card.querySelector('.product-quantity');
+        const decreaseBtn = card.querySelector('.quantity-decrease');
+        const increaseBtn = card.querySelector('.quantity-increase');
+
+        if (decreaseBtn) {
+            decreaseBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Impede que o clique propague para o card (seleção)
+                adjustQuantity(quantityInput, -1);
+            });
+        }
+        if (increaseBtn) {
+            increaseBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Impede que o clique propague para o card (seleção)
+                adjustQuantity(quantityInput, 1);
+            });
+        }
+        if (quantityInput) {
+            // Assegura que a quantidade não excede o estoque ou é menor que 1
+            quantityInput.addEventListener('change', (e) => {
+                e.stopPropagation();
+                let val = parseInt(quantityInput.value);
+                const max = parseInt(quantityInput.max);
+                if (isNaN(val) || val < 1) {
+                    quantityInput.value = 1;
+                } else if (val > max) {
+                    quantityInput.value = max;
+                    enviarMensagemAjax(`Quantidade máxima para ${produto.nome} é ${max}`, "aviso");
+                }
+                updateOrderSummary();
+            });
+            // Impede a edição manual com teclado se quiser que seja só pelos botões
+            // quantityInput.addEventListener('keydown', (e) => { e.preventDefault(); });
+        }
         
         container.appendChild(card);
     });
 }
-//// Função para exibir produtos na grade
-//function exibirProdutos(produtos) {
-//    const container = document.getElementById('products-container');
-//    container.innerHTML = '';
-//    
-//    if (produtos.length === 0) {
-//        container.innerHTML = '<p>Nenhum produto disponível</p>';
-//        return;
-//    }
-//    
-//    produtos.forEach(produto => {
-//        const card = document.createElement('div');
-//        card.className = 'product-card';
-//        card.dataset.id = produto.codigo_produto;
-//        card.dataset.price = produto.preco;
-//        card.dataset.name = produto.nome.toLowerCase();
-//        card.dataset.gender = produto.genero;
-//        card.dataset.type = produto.tipo.toLowerCase();
-//        
-//        card.innerHTML = `
-//            <img src="data:image/jpeg;base64,${produto.imagem || ''}" alt="${produto.nome}" class="product-image">
-//            <div class="product-info">
-//                <h3>${produto.nome}</h3>
-//                <p>Gênero: ${produto.genero}</p>
-//                <p>Código: ${produto.codigo_produto}</p>
-//                <p>Tamanhos: ${produto.tamanho}</p>
-//                <p class="product-price">R$ ${produto.preco.toFixed(2)}</p>
-//                <p class="availability ${produto.quant_estoque > 0 ? 'available' : 'unavailable'}">
-//                    ${produto.quant_estoque > 0 ? 'Disponível' : 'Esgotado'}
-//                </p>
-//            </div>
-//        `;
-//        
-//        if (produto.quant_estoque > 0) {
-//            card.onclick = () => toggleProductSelection(card);
-//        }
-//        
-//        container.appendChild(card);
-//    });
-//}
+
+function adjustQuantity(inputElement, delta) {
+    let currentValue = parseInt(inputElement.value);
+    const maxStock = parseInt(inputElement.max);
+    let newValue = currentValue + delta;
+
+    if (newValue < 1) {
+        newValue = 1; // Quantidade mínima é 1
+    } else if (newValue > maxStock) {
+        newValue = maxStock; // Não excede o estoque
+        enviarMensagemAjax(`Quantidade máxima para este produto é ${maxStock}`, "aviso");
+    }
+    inputElement.value = newValue;
+    updateOrderSummary(); // Atualiza o resumo após mudar a quantidade
+}
+
 
 function filterProducts() {
     const searchTerm = document.getElementById('product-search').value.toLowerCase();
@@ -148,7 +172,7 @@ function filterProducts() {
     const typeFilter = document.getElementById('product-type').value;
     
     const container = document.getElementById('products-container');
-    container.innerHTML = '';
+    container.innerHTML = ''; // Limpa antes de exibir os filtrados
     
     const filtered = produtosDisponiveis.filter(produto => {
         const matchesSearch = produto.nome.toLowerCase().includes(searchTerm);
@@ -163,37 +187,23 @@ function filterProducts() {
         return;
     }
     
-    filtered.forEach(produto => {
-        const card = document.createElement('div');
-        card.className = 'product-card';
-        card.dataset.id = produto.codigo_produto;
-        card.dataset.price = produto.preco;
-        card.dataset.name = produto.nome;
-        card.dataset.gender = produto.genero;
-        
-        card.innerHTML = `
-            <img src="data:image/jpeg;base64,${produto.imagem}" alt="${produto.nome}" class="product-image">
-            <div class="product-info">
-                <h3>${produto.nome}</h3>
-                <p>Gênero: ${produto.genero}</p>
-                <p>Código: ${produto.codigo_produto}</p>
-                <p>Tamanhos: ${produto.tamanho}</p>
-                <p class="product-price">R$ ${produto.preco.toFixed(2)}</p>
-                <p class="availability ${produto.quant_estoque > 0 ? 'available' : 'unavailable'}">
-                    ${produto.quant_estoque > 0 ? 'Disponível' : 'Esgotado'}
-                </p>
-            </div>
-        `;
-        
-        if (produto.quant_estoque > 0) {
-            card.onclick = () => toggleProductSelection(card);
+    // Reutiliza a função exibirProdutos para renderizar os produtos filtrados
+    // Isso garante que todos os event listeners sejam reatribuídos
+    exibirProdutos(filtered); 
+
+    // Reaplicar a seleção para os produtos que estavam selecionados
+    const currentSelectedProductIds = Array.from(document.querySelectorAll('.product-card.selected')).map(card => card.dataset.id);
+    currentSelectedProductIds.forEach(id => {
+        const card = container.querySelector(`.product-card[data-id="${id}"]`);
+        if (card) {
+            card.classList.add('selected');
+            card.style.boxShadow = "0 0 0 2px #d32f2f"; // Reaplicar feedback visual
+            card.querySelector('.quantity-control').classList.remove('hidden'); // Mostrar controle
         }
-        
-        container.appendChild(card);
     });
+    updateOrderSummary(); // Re-atualiza o resumo após re-renderizar e re-selecionar
 }
 
-// ... (restante do código mantido)
 // Funções de pedido (mantidas com ajustes)
 function startNewOrder() {
     document.getElementById("initial-container").classList.add("hidden");
@@ -204,7 +214,7 @@ function cancelOrder() {
     document.getElementById("initial-container").classList.remove("hidden");
     document.getElementById("order-container").classList.add("hidden");
     resetForm();
-    window.location.reload();
+    window.location.reload(); // Recarrega para limpar completamente o estado dos produtos
 }
 
 function setCurrentDate() {
@@ -212,43 +222,49 @@ function setCurrentDate() {
     const formattedDate = today.toLocaleDateString('pt-BR');
     document.getElementById("order-date").textContent = formattedDate;
 }
+
 // Atualize a função toggleProductSelection
 function toggleProductSelection(element) {
-    // Verifica se o produto está disponível
-    const disponivel = element.querySelector('.availability').textContent.includes('Disponível');
-    
-    if (disponivel) {
-        element.classList.toggle("selected");
-        
-        // Feedback visual
+    const quantityControl = element.querySelector('.quantity-control');
+    const quantityInput = element.querySelector('.product-quantity');
+    const stock = parseInt(element.dataset.stock);
+
+    // Verifica se o produto está disponível (estoque > 0)
+    if (stock > 0) {
+        // Se o card já está selecionado, deseleciona
         if (element.classList.contains("selected")) {
-            element.style.boxShadow = "0 0 0 2px #d32f2f";
-        } else {
+            element.classList.remove("selected");
             element.style.boxShadow = "none";
+            quantityControl.classList.add('hidden'); // Esconde o controle de quantidade
+            quantityInput.value = 1; // Reseta a quantidade para 1
+        } else {
+            // Se o card não está selecionado, seleciona
+            element.classList.add("selected");
+            element.style.boxShadow = "0 0 0 2px #d32f2f";
+            quantityControl.classList.remove('hidden'); // Mostra o controle de quantidade
+            quantityInput.value = 1; // Garante que a quantidade inicial é 1
         }
-        
         updateOrderSummary();
     } else {
-        enviarMensagemAjax("Este produto está esgotado", "erro");
+        enviarMensagemAjax("Este produto está esgotado e não pode ser selecionado", "erro");
+        element.classList.remove("selected"); // Garante que o produto esgotado não fica selecionado
+        element.style.boxShadow = "none";
+        quantityControl.classList.add('hidden'); // Esconde o controle de quantidade
+        quantityInput.value = 1; // Reseta a quantidade
+        updateOrderSummary(); // Atualiza caso um esgotado estivesse selecionado
     }
 }
-//function toggleProductSelection(element) {
-//    if (parseInt(element.querySelector('.availability').textContent.includes('Disponível'))) {
-//        element.classList.toggle("selected");
-//        updateOrderSummary();
-//    }
-//}
-//function toggleProductSelection(element) {
-//    element.classList.toggle("selected");
-//    updateOrderSummary();
-//}
 
 function selectPayment(element, type) {
     document.querySelectorAll('.payment-option').forEach(opt => {
         opt.classList.remove('selected');
+        // Desmarcar o rádio button associado
+        opt.querySelector('input[type="radio"]').checked = false;
     });
     
     element.classList.add('selected');
+    // Marcar o rádio button associado
+    element.querySelector('input[type="radio"]').checked = true;
     
     const installments = document.getElementById("installments");
     if (type === 'Crédito') {
@@ -256,39 +272,54 @@ function selectPayment(element, type) {
     } else {
         installments.style.display = 'none';
     }
+    updateOrderSummary(); // Atualiza o resumo caso haja alteração de juros
 }
+
 function updateOrderSummary() {
     const selectedProducts = document.querySelectorAll('.product-card.selected');
-    document.getElementById("selected-items").textContent = selectedProducts.length;
-
+    let totalItems = 0;
     let subtotal = 0;
-    selectedProducts.forEach(product => {
-        subtotal += parseFloat(product.dataset.price);
+
+    selectedProducts.forEach(productCard => {
+        const quantityInput = productCard.querySelector('.product-quantity');
+        const quantity = parseInt(quantityInput.value);
+        const price = parseFloat(productCard.dataset.price);
+
+        totalItems += quantity;
+        subtotal += price * quantity;
     });
     
+    document.getElementById("selected-items").textContent = totalItems;
     document.getElementById("subtotal").textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-    document.getElementById("total").textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+    
+    let total = subtotal;
+    const paymentMethod = document.querySelector('input[name="payment"]:checked')?.value;
+    
+    // Lógica para juros do cartão de crédito (exemplo simples)
+    if (paymentMethod === 'Crédito') {
+        const installmentSelect = document.getElementById('installment-select');
+        const installments = parseInt(installmentSelect.value);
+        if (installments >= 4) { // Exemplo: juros a partir de 4 parcelas
+            total *= 1.05; // Adiciona 5% de juros
+        }
+    }
+
+    document.getElementById("total").textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
 }
-//function updateOrderSummary() {
-//    const selectedProducts = document.querySelectorAll('.product-card.selected');
-//    document.getElementById("selected-items").textContent = selectedProducts.length;
-//
-//    let subtotal = 0;
-//    selectedProducts.forEach(product => {
-//        subtotal += parseFloat(product.dataset.price);
-//    });
-//    
-//    document.getElementById("subtotal").textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-//    document.getElementById("total").textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-//}
 
 function resetForm() {
     document.getElementById("client-name").value = "";
     document.getElementById("client-phone").value = "";
     document.getElementById("client-cpf").value = "";
+    document.getElementById("client-email").value = "";
     
     document.querySelectorAll('.product-card').forEach(card => {
         card.classList.remove('selected');
+        card.style.boxShadow = "none"; // Remover feedback visual
+        const quantityControl = card.querySelector('.quantity-control');
+        const quantityInput = card.querySelector('.product-quantity');
+        if (quantityControl) quantityControl.classList.add('hidden'); // Esconde o controle
+        if (quantityInput) quantityInput.value = 1; // Reseta a quantidade
     });
     
     document.getElementById("product-search").value = "";
@@ -306,18 +337,26 @@ function resetForm() {
     document.getElementById("selected-items").textContent = "0";
     document.getElementById("subtotal").textContent = "R$ 0,00";
     document.getElementById("total").textContent = "R$ 0,00";
+    
+    // Recarrega os produtos para refletir qualquer mudança de estoque no backend
+    // Não é mais necessário o window.location.reload() em cancelOrder()
+    // Apenas chame carregarProdutos() aqui para resetar a lista de produtos
+    carregarProdutos();
 }
 
 function enviarMensagemAjax(mensagem, tipo) {
     const mensagemContainer = document.getElementById('mensagem');
 
-    if (tipo === "sucesso") {
-        mensagemContainer.innerHTML = `<div class="mensagem sucesso">${mensagem}</div>`;
-    } else {
-        mensagemContainer.innerHTML = `<div class="mensagem erro">${mensagem}</div>`;
-    }
+    // Limpa mensagens anteriores imediatamente para evitar sobreposição
+    mensagemContainer.innerHTML = ''; 
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `mensagem ${tipo}`;
+    msgDiv.textContent = mensagem;
+    mensagemContainer.appendChild(msgDiv);
+
     setTimeout(() => {
-        mensagemContainer.innerHTML = '';
+        msgDiv.remove(); // Remove a mensagem após 3 segundos
     }, 3000);
 }
 
@@ -436,17 +475,6 @@ function limparMensagem(inputElement) {
     }
 }
 
-// Configurar eventos de formatação
-document.addEventListener("DOMContentLoaded", () => {
-    const nomeInput = document.getElementById("client-name");
-    const cpfInput = document.getElementById("client-cpf");
-    const telefoneInput = document.getElementById("client-phone");
-    
-    if (nomeInput) nomeInput.addEventListener("input", formatarNome);
-    if (cpfInput) cpfInput.addEventListener("input", formatarCPF);
-    if (telefoneInput) telefoneInput.addEventListener("input", formatarTelefone);
-});
-
 // Função para enviar o pedido
 function saveOrder() {
     const clientName = document.getElementById("client-name").value.trim();
@@ -477,17 +505,77 @@ function saveOrder() {
         return;
     }
 
+    // Coleta produtos com suas quantidades
+    const produtosParaEnvio = [];
+    let isValidQuantity = true;
+    selectedProducts.forEach(productCard => {
+        const quantityInput = productCard.querySelector('.product-quantity');
+        const codigo_produto = parseInt(productCard.dataset.id);
+        const nome_produto = productCard.dataset.name;
+        const preco_produto = parseFloat(productCard.dataset.price);
+        const genero_produto = productCard.dataset.gender;
+        const estoque_disponivel = parseInt(productCard.dataset.stock);
+        let quantidade_selecionada = parseInt(quantityInput.value);
+
+        // Validação da quantidade: deve ser pelo menos 1 e não pode exceder o estoque
+        if (isNaN(quantidade_selecionada) || quantidade_selecionada < 1) {
+            enviarMensagemAjax(`A quantidade para o produto '${nome_produto}' deve ser pelo menos 1.`, "erro");
+            isValidQuantity = false;
+            return; // Sai do forEach
+        }
+        if (quantidade_selecionada > estoque_disponivel) {
+            enviarMensagemAjax(`A quantidade selecionada para '${nome_produto}' (${quantidade_selecionada}) excede o estoque disponível (${estoque_disponivel}).`, "erro");
+            isValidQuantity = false;
+            return; // Sai do forEach
+        }
+
+        produtosParaEnvio.push({
+            codigo_produto: codigo_produto,
+            nome: nome_produto,
+            preco: preco_produto,
+            genero: genero_produto,
+            quantidade: quantidade_selecionada // Adiciona a quantidade
+        });
+    });
+
+    if (!isValidQuantity) {
+        return; // Impede o envio se houver erro de quantidade
+    }
+
+
+    const valorTotalElement = document.getElementById("total");
+    const valorTotalText = valorTotalElement.textContent;
+    const valorTotal = parseFloat(valorTotalText.replace('R$', '').replace(',', '.'));
+    
+    if (isNaN(valorTotal) || valorTotal <= 0) {
+        enviarMensagemAjax("O valor total do pedido é inválido.", "erro");
+        return;
+    }
+
+    const selectedPaymentOption = document.querySelector('input[name="payment"]:checked');
+    let formaPagamento = selectedPaymentOption ? selectedPaymentOption.value : null;
+
+    // NOVA VALIDAÇÃO: Torna a forma de pagamento obrigatória
+    if (!formaPagamento) {
+        enviarMensagemAjax("Selecione uma forma de pagamento para continuar", "erro");
+        return;
+    }
+
+    // Modificação: Adicionar parcela se for Crédito
+    if (formaPagamento === 'Crédito') {
+        const installmentSelect = document.getElementById('installment-select');
+        const installments = installmentSelect.value;
+        formaPagamento = `Crédito ${installments}x`; // Formato: "Crédito 3x"
+    }
+
     const orderData = {
         nome_cliente: clientName,
         telefone_cliente: clientPhone,
         cpf_cliente: clientCpf,
         email_cliente: clientEmail,
-        produtos: Array.from(selectedProducts).map(product => ({
-            codigo_produto: parseInt(product.dataset.id),
-            nome: product.dataset.name,
-            preco: parseFloat(product.dataset.price),
-            genero: product.dataset.gender
-        }))
+        produtos: produtosParaEnvio, // Usa a lista de produtos com quantidades
+        forma_pagamento: formaPagamento,
+        valor_total: valorTotal
     };
 
     enviarPedido(orderData);
@@ -502,11 +590,9 @@ function enviarPedido(orderData) {
         body: JSON.stringify(orderData)
     })
     .then(response => {
-        // Primeiro verifique se a resposta é JSON
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
             return response.text().then(text => {
-                // Se não for JSON, mas o status for OK, considere como sucesso
                 if (response.ok) {
                     return { status: "success", message: "Pedido registrado com sucesso" };
                 }
@@ -519,8 +605,38 @@ function enviarPedido(orderData) {
         if (data.status === "success") {
             enviarMensagemAjax(data.message, "sucesso");
 
+            // No sucesso, atualizar o estoque no frontend para refletir a venda
+            // Itera sobre os produtos vendidos e subtrai a quantidade do estoque disponível
+            orderData.produtos.forEach(orderedProduct => {
+                const productToUpdate = produtosDisponiveis.find(p => p.codigo_produto === orderedProduct.codigo_produto);
+                if (productToUpdate) {
+                    productToUpdate.quant_estoque -= orderedProduct.quantidade;
+                    // Atualiza a exibição do estoque no card
+                    const cardElement = document.querySelector(`.product-card[data-id="${orderedProduct.codigo_produto}"]`);
+                    if (cardElement) {
+                        cardElement.dataset.stock = productToUpdate.quant_estoque; // Atualiza o dataset
+                        const availabilityElement = cardElement.querySelector('.availability');
+                        const quantityInput = cardElement.querySelector('.product-quantity');
+                        if (productToUpdate.quant_estoque > 0) {
+                            availabilityElement.textContent = `Disponível (${productToUpdate.quant_estoque} no estoque)`;
+                            availabilityElement.classList.replace('unavailable', 'available');
+                            quantityInput.max = productToUpdate.quant_estoque; // Atualiza o max do input
+                        } else {
+                            availabilityElement.textContent = 'Esgotado';
+                            availabilityElement.classList.replace('available', 'unavailable');
+                            quantityInput.max = 0;
+                            // Se esgotou, deseleciona o card e esconde o controle de quantidade
+                            if (cardElement.classList.contains('selected')) {
+                                toggleProductSelection(cardElement); // Desseleciona e esconde o controle
+                            }
+                        }
+                    }
+                }
+            });
+
             setTimeout(function() {
-                cancelOrder();
+                resetForm(); // Agora resetForm() chama carregarProdutos() para atualizar
+                window.location.reload(); // Recarrega para limpar completamente o estado dos produtos
             }, 500);
         } else {
             enviarMensagemAjax(data.message || "Erro ao registrar pedido", "erro");
@@ -528,43 +644,17 @@ function enviarPedido(orderData) {
     })
     .catch(error => {
         console.error('Erro:', error);
-        // Se o pedido foi salvo mas houve erro na resposta, mostre mensagem diferente
         if (error.message.includes("Pedido registrado")) {
             enviarMensagemAjax("Pedido registrado com sucesso", "sucesso");
+            // Se o pedido foi registrado, mas o estoque não foi atualizado no front
+            // por algum motivo (erro de rede, etc.), o resetForm vai recarregar os produtos
+            // e trazer o estoque correto do backend.
             setTimeout(function() {
-                cancelOrder();
+                resetForm();
+                window.location.reload(); // Recarrega para limpar completamente o estado dos produtos
             }, 500);
         } else {
             enviarMensagemAjax("Pedido pode ter sido registrado, mas houve um erro na resposta: " + error.message, "aviso");
         }
     });
 }
-//function enviarPedido(orderData) {
-//    fetch('../PHP/registrar_venda.php', {
-//        method: 'POST',
-//        headers: {
-//            'Content-Type': 'application/json',
-//        },
-//        body: JSON.stringify(orderData)
-//    })
-//    .then(response => {
-//        if (!response.ok) {
-//            return response.text().then(text => {
-//                throw new Error(text || "Erro no servidor");
-//            });
-//        }
-//        return response.json();
-//    })
-//    .then(data => {
-//        if (data.status === "success") {
-//            enviarMensagemAjax(data.message, "sucesso");
-//            cancelOrder();
-//        } else {
-//            enviarMensagemAjax(data.message || "Erro ao registrar pedido", "erro");
-//        }
-//    })
-//    .catch(error => {
-//        console.error('Erro:', error);
-//        enviarMensagemAjax(error.message || "Erro ao conectar com o servidor", "erro");
-//    });
-//}

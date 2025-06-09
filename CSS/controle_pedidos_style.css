@@ -96,7 +96,7 @@ main {
     padding: 20px;
 }
 
-.pedidos-control {
+.pedidos-control { /* Renomeado de .sales-control */
     background: white;
     border-radius: 10px;
     padding: 20px;
@@ -152,11 +152,12 @@ h2 {
     background: #b71c1c;
 }
 
-.pedidos-list {
+
+.pedidos-list { /* Renomeado de .sales-list */
     margin-bottom: 30px;
 }
 
-.pedido-item {
+.pedido-item { /* Renomeado de .sale-item */
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     overflow: hidden;
@@ -164,7 +165,7 @@ h2 {
     background: white;
 }
 
-.pedido-header {
+.pedido-header { /* Renomeado de .sale-header */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -175,29 +176,29 @@ h2 {
     gap: 15px;
 }
 
-.pedido-info {
+.pedido-info { /* Renomeado de .sale-info */
     display: flex;
     gap: 25px;
     flex-wrap: wrap;
 }
 
-.pedido-info-item {
+.pedido-info-item { /* Renomeado de .sale-info-item */
     display: flex;
     flex-direction: column;
 }
 
-.pedido-info-label {
+.pedido-info-label { /* Renomeado de .sale-info-label */
     font-size: 12px;
     color: #777;
     margin-bottom: 3px;
 }
 
-.pedido-info-value {
+.pedido-info-value { /* Renomeado de .sale-info-value */
     font-weight: 600;
     color: #333;
 }
 
-.pedido-products {
+.pedido-products { /* Renomeado de .sale-products */
     padding: 15px;
 }
 
@@ -233,7 +234,7 @@ h2 {
     margin: 2px 0;
 }
 
-.pedido-status {
+.pedido-status { /* Renomeado de .sale-status */
     display: flex;
     align-items: center;
     padding: 15px;
@@ -251,37 +252,22 @@ h2 {
     min-width: 200px;
 }
 
-.draft-button {
-    background: #1976d2;
-    color: white;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s;
-    margin-left: auto;
-}
-
-.draft-button:hover {
-    background: #1565c0;
-}
+/* .draft-button e seu hover não são usados aqui, podem ser removidos ou ignorados */
+/* .draft-button { ... } */
+/* .draft-button:hover { ... } */
 
 @media (max-width: 768px) {
     .pedido-header {
-      flex-direction: column;
-      align-items: flex-start;
+        flex-direction: column;
+        align-items: flex-start;
     }
     
     .pedido-info {
-      width: 100%;
-      justify-content: space-between;
+        width: 100%;
+        justify-content: space-between;
     }
     
-    .draft-button {
-      margin-left: 0;
-      width: 100%;
-    }
+    /* .draft-button { ... } */
 }
 .mensagem {
     position: fixed;
@@ -302,4 +288,31 @@ h2 {
 
 .mensagem.erro {
     background-color: red;
+}
+
+/* Windows title */
+h3 {
+    color: white;
+    font-size: 18px;
+    margin: 0;
+}
+
+#windowtitle {
+    width: 100%;
+    display: flex;
+    text-align: left;
+}
+
+#inner {
+    text-align: left;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.menu-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
 }

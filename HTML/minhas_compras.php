@@ -18,8 +18,13 @@ if (!isset($_SESSION['usuario_logado'])) {
 <body>
   <header>
     <div class="logo">
-      <img src="../Fotos/Logo.png" alt="Logo Identidade">
+      <img src="../Fotos/Logo-Branco.png" alt="Logo Identidade">
       <h1>Identidade</h1>
+    </div>
+
+    <div id="windowtitle">
+        <h3 id="inner">-</h3>
+        <h3>Minhas Compras</h3>
     </div>
     <button class="menu-button" onclick="toggleMenu()">☰</button>
   </header>
@@ -29,8 +34,6 @@ if (!isset($_SESSION['usuario_logado'])) {
 
   <main>
     <div class="sales-control">
-      <h2>Minhas Compras</h2>
-
       <div class="filter-section">
         <div class="date-range">
           <span>De:</span>

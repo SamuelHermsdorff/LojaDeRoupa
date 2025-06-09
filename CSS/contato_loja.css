@@ -264,3 +264,23 @@ main {
 .mensagem.erro {
     background-color: red;
 }
+
+/* Windows title */
+h3 {
+    color: white;
+    font-size: 18px;
+    margin: 0;
+}
+
+#windowtitle {
+    width: 100%;
+    display: flex;
+    text-align: left;
+    margin-top: 1px;
+}
+
+#inner {
+    text-align: left;
+    margin-left: 10px;
+    margin-right: 10px;
+}
