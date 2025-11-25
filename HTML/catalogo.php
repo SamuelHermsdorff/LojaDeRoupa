@@ -45,13 +45,14 @@ if (!isset($_SESSION['usuario_logado'])) {
       </select>
       <select id="filtro-tipo">
         <option>Tipo</option>
-        <option>Camiseta</option>
+        <option>Camisa</option>
         <option>Saia</option>
         <option>Shorts</option>
         <option>Bermuda</option>
         <option>Tênis</option>
         <option>Vestido</option>
         <option>Top</option>
+        <option>Calça</option>
       </select>
     </div>
 

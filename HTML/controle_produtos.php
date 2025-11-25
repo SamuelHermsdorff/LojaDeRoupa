@@ -33,11 +33,8 @@ if (!$_SESSION['usuario']['funcionario'] && !$_SESSION['usuario']['administrador
     <button class="menu-button" onclick="toggleMenu()">☰</button>
   </header>
 
-<!-- Container para a mensagem de sucesso ou erro -->
 <div id="mensagem"></div>
   <main>
-    <!--<h2 class="control-title">Controle de Produtos</h2>-->
-
     <div class="filters">
       <input type="text" id="search-product" placeholder="Pesquisar produto...">
       <select id="filter-gender">
@@ -47,13 +44,16 @@ if (!$_SESSION['usuario']['funcionario'] && !$_SESSION['usuario']['administrador
         <option value="Unissex">Unissex</option>
       </select>
       <select id="filter-type">
-        <option value="">Tipo</option>
-        <option value="Camisa">Camisa</option>
+        <option value="">Tipo</option> 
+        <option>Camisa</option>
         <option>Short</option>
         <option>Bermuda</option>
         <option>Vestido</option>
         <option>Calça</option>
         <option>Tênis</option>
+        <option>Saia</option>
+        <option>Camiseta</option>
+        <option>Jaqueta</option>
       </select>
       <button class="add-button" onclick="openProductModal()">Cadastrar Produto</button>
     </div>
@@ -75,12 +75,10 @@ if (!$_SESSION['usuario']['funcionario'] && !$_SESSION['usuario']['administrador
         </tr>
       </thead>
       <tbody id="product-table-body">
-        <!-- Produtos serão inseridos aqui via JavaScript -->
-      </tbody>
+        </tbody>
     </table>
   </main>
 
-<!-- Modal Produto -->
 <div id="product-modal" class="modal">
   <div class="modal-content">
     <span class="close-button" onclick="closeProductModal()">&times;</span>
@@ -151,10 +149,9 @@ if (!$_SESSION['usuario']['funcionario'] && !$_SESSION['usuario']['administrador
   </div>
 </div>
 
-  <!-- Modal de Confirmação -->
   <div id="confirmation-modal" class="confirmation-modal">
     <div class="confirmation-content">
-      <h3 id="confirmation-message">Deseja realmente apagar este produto?</h3>
+      <h2 id="confirmation-message">Deseja realmente apagar este produto?</h2>
       <div class="confirmation-buttons">
         <button onclick="confirmAction(true)">Sim</button>
         <button onclick="confirmAction(false)">Não</button>

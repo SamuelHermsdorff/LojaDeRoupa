@@ -135,7 +135,7 @@ function editarProduto($conn) {
     $nome = $_POST['product-name'];
     $tipo = $_POST['product-type'];
     $genero = $_POST['product-gender'];
-    $preco = $_POST['product-price'];
+    $preco = (float)$_POST['product-price'];
     $quant_estoque = $_POST['product-stock'];
     $tamanho = $_POST['product-size'];
     $cor = $_POST['product-color'];
@@ -146,7 +146,7 @@ function editarProduto($conn) {
     if (isset($_FILES['product-image']) && $_FILES['product-image']['error'] === UPLOAD_ERR_OK) {
         $imagem = file_get_contents($_FILES['product-image']['tmp_name']);
         $stmt = $conn->prepare("UPDATE Produtos SET nome=?, tipo=?, genero=?, quant_estoque=?, preco=?, imagem=?, tamanho=?, cor=?, descricao=?, fk_fornecedor=? WHERE codigo_produto=?");
-        $stmt->bind_param("sssdbsssssi", $nome, $tipo, $genero, $quant_estoque, $preco, $imagem, $tamanho, $cor, $descricao, $fornecedor, $codigo_produto);
+        $stmt->bind_param("sssdsssssii", $nome, $tipo, $genero, $quant_estoque, $preco, $imagem, $tamanho, $cor, $descricao, $fornecedor, $codigo_produto);
     } else {
         $stmt = $conn->prepare("UPDATE Produtos SET nome=?, tipo=?, genero=?, quant_estoque=?, preco=?, tamanho=?, cor=?, descricao=?, fk_fornecedor=? WHERE codigo_produto=?");
         $stmt->bind_param("sssdssssii", $nome, $tipo, $genero, $quant_estoque, $preco, $tamanho, $cor, $descricao, $fornecedor, $codigo_produto);

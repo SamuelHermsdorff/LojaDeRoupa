@@ -22,11 +22,18 @@ body {
     overflow: hidden;
 }
 
-.toggle {
+/* Substitua a regra antiga ".toggle" por esta 
+  para aplicar o estilo em todos os links
+*/
+.toggle, 
+.toggle-register, 
+.toggle-login, 
+.toggle-forgot {
     color: red;
     cursor: pointer;
     font-weight: bold;
 }
+
 .confirmation-box {
     display: none;
     position: fixed;
@@ -387,3 +394,4 @@ button:hover {
 .text-error {
     color: #dc3545;
 }
+

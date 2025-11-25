@@ -38,13 +38,19 @@ try {
     echo json_encode(['status' => 'erro', 'mensagem' => $e->getMessage()]);
 }
 
+// ATUALIZADO: listarFornecedores
 function listarFornecedores($conn) {
     $search = $conn->real_escape_string($_GET['search'] ?? '');
     
-    $sql = "SELECT codigo_fornecedor, nome, cnpj_cpf FROM Fornecedores";
+    // MUDANÇA: Buscar os novos campos
+    $sql = "SELECT codigo_fornecedor, nome, cnpj_cpf, telefone, edereco, nome_representante FROM Fornecedores";
     
     if (!empty($search)) {
-        $sql .= " WHERE nome LIKE '%$search%' OR cnpj_cpf LIKE '%$search%'";
+        // MUDANÇA: Permitir busca nos novos campos
+        $sql .= " WHERE nome LIKE '%$search%' 
+                  OR cnpj_cpf LIKE '%$search%' 
+                  OR telefone LIKE '%$search%' 
+                  OR nome_representante LIKE '%$search%'";
     }
     
     $sql .= " ORDER BY nome";
@@ -59,10 +65,12 @@ function listarFornecedores($conn) {
     echo json_encode($fornecedores);
 }
 
+// ATUALIZADO: buscarFornecedor
 function buscarFornecedor($conn) {
     $id = intval($_GET['id']);
     
-    $stmt = $conn->prepare("SELECT codigo_fornecedor, nome, cnpj_cpf FROM Fornecedores WHERE codigo_fornecedor = ?");
+    // ATUALIZADO: SELECT para incluir novos campos
+    $stmt = $conn->prepare("SELECT codigo_fornecedor, nome, cnpj_cpf, telefone, edereco, nome_representante FROM Fornecedores WHERE codigo_fornecedor = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -74,6 +82,7 @@ function buscarFornecedor($conn) {
     }
 }
 
+// ATUALIZADO: cadastrarFornecedor
 function cadastrarFornecedor($conn) {
     header('Content-Type: application/json');
     
@@ -83,9 +92,14 @@ function cadastrarFornecedor($conn) {
         $cnpj_cpf_formatado = trim($conn->real_escape_string($_POST['cnpj_cpf'] ?? ''));
         $cnpj_cpf_numeros = preg_replace('/[^0-9]/', '', $cnpj_cpf_formatado);
 
-        // Validações básicas
-        if (empty($nome) || empty($cnpj_cpf_numeros)) {
-            throw new Exception('Preencha todos os campos obrigatórios');
+        // NOVOS DADOS
+        $telefone = trim($conn->real_escape_string($_POST['telefone'] ?? ''));
+        $edereco = trim($conn->real_escape_string($_POST['edereco'] ?? '')); // 'edereco'
+        $nome_representante = trim($conn->real_escape_string($_POST['nome_representante'] ?? ''));
+
+        // Validações básicas (com novos campos obrigatórios)
+        if (empty($nome) || empty($cnpj_cpf_numeros) || empty($telefone) || empty($edereco)) {
+            throw new Exception('Preencha todos os campos obrigatórios (Nome, CNPJ/CPF, Telefone, Endereço)');
         }
 
         if (strlen($nome) < 3) {
@@ -118,8 +132,8 @@ function cadastrarFornecedor($conn) {
         }
 
         // Inserir no banco de dados (com formatação)
-        $stmt = $conn->prepare("INSERT INTO Fornecedores (nome, cnpj_cpf) VALUES (?, ?)");
-        $stmt->bind_param("ss", $nome, $cnpj_cpf_formatado);
+        $stmt = $conn->prepare("INSERT INTO Fornecedores (nome, cnpj_cpf, telefone, edereco, nome_representante) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", $nome, $cnpj_cpf_formatado, $telefone, $edereco, $nome_representante);
         
         if ($stmt->execute()) {
             echo json_encode([
@@ -141,6 +155,8 @@ function cadastrarFornecedor($conn) {
         ]);
     }
 }
+
+// ATUALIZADO: editarFornecedor
 function editarFornecedor($conn) {
     header('Content-Type: application/json');
     
@@ -151,9 +167,14 @@ function editarFornecedor($conn) {
         $cnpj_cpf_formatado = trim($conn->real_escape_string($_POST['cnpj_cpf'] ?? ''));
         $cnpj_cpf_numeros = preg_replace('/[^0-9]/', '', $cnpj_cpf_formatado);
 
-        // Validações básicas
-        if (empty($id) || empty($nome) || empty($cnpj_cpf_numeros)) {
-            throw new Exception('Preencha todos os campos obrigatórios');
+        // NOVOS DADOS
+        $telefone = trim($conn->real_escape_string($_POST['telefone'] ?? ''));
+        $edereco = trim($conn->real_escape_string($_POST['edereco'] ?? '')); // 'edereco'
+        $nome_representante = trim($conn->real_escape_string($_POST['nome_representante'] ?? ''));
+
+        // Validações básicas (com novos campos obrigatórios)
+        if (empty($id) || empty($nome) || empty($cnpj_cpf_numeros) || empty($telefone) || empty($edereco)) {
+            throw new Exception('Preencha todos os campos obrigatórios (Nome, CNPJ/CPF, Telefone, Endereço)');
         }
 
         if (strlen($nome) < 3) {
@@ -195,8 +216,8 @@ function editarFornecedor($conn) {
         }
 
         // Atualizar no banco de dados (com formatação)
-        $stmt = $conn->prepare("UPDATE Fornecedores SET nome = ?, cnpj_cpf = ? WHERE codigo_fornecedor = ?");
-        $stmt->bind_param("ssi", $nome, $cnpj_cpf_formatado, $id);
+        $stmt = $conn->prepare("UPDATE Fornecedores SET nome = ?, cnpj_cpf = ?, telefone = ?, edereco = ?, nome_representante = ? WHERE codigo_fornecedor = ?");
+        $stmt->bind_param("sssssi", $nome, $cnpj_cpf_formatado, $telefone, $edereco, $nome_representante, $id);
         
         if ($stmt->execute()) {
             echo json_encode([
@@ -267,74 +288,6 @@ function validarCNPJ($cnpj) {
     return true;
 }
 
-//function cadastrarFornecedor($conn) {
-//    $nome = $conn->real_escape_string($_POST['nome'] ?? '');
-//    $cnpj_cpf = $conn->real_escape_string($_POST['cnpj_cpf'] ?? '');
-//    
-//    // Validações básicas
-//    if (empty($nome) || empty($cnpj_cpf)) {
-//        throw new Exception('Preencha todos os campos obrigatórios');
-//    }
-//    
-//    // Verificar CNPJ/CPF único
-//    $stmt_check = $conn->prepare("SELECT codigo_fornecedor FROM Fornecedores WHERE cnpj_cpf = ?");
-//    $stmt_check->bind_param("s", $cnpj_cpf);
-//    $stmt_check->execute();
-//    
-//    if ($stmt_check->get_result()->num_rows > 0) {
-//        throw new Exception('CNPJ/CPF já cadastrado');
-//    }
-//    
-//    // Inserir fornecedor
-//    $stmt = $conn->prepare("INSERT INTO Fornecedores (nome, cnpj_cpf) VALUES (?, ?)");
-//    $stmt->bind_param("ss", $nome, $cnpj_cpf);
-//    
-//    if ($stmt->execute()) {
-//        echo json_encode(['status' => 'sucesso', 'mensagem' => 'Fornecedor cadastrado com sucesso']);
-//    } else {
-//        throw new Exception('Erro ao cadastrar fornecedor: ' . $conn->error);
-//    }
-//}
-//
-//function editarFornecedor($conn) {
-//    $id = intval($_POST['id'] ?? 0);
-//    $nome = $conn->real_escape_string($_POST['nome'] ?? '');
-//    $cnpj_cpf = $conn->real_escape_string($_POST['cnpj_cpf'] ?? '');
-//    
-//    // Validações básicas
-//    if (empty($id) || empty($nome) || empty($cnpj_cpf)) {
-//        throw new Exception('Preencha todos os campos obrigatórios');
-//    }
-//    
-//    // Verificar se fornecedor existe
-//    $stmt_check = $conn->prepare("SELECT codigo_fornecedor FROM Fornecedores WHERE codigo_fornecedor = ?");
-//    $stmt_check->bind_param("i", $id);
-//    $stmt_check->execute();
-//    
-//    if ($stmt_check->get_result()->num_rows === 0) {
-//        throw new Exception('Fornecedor não encontrado');
-//    }
-//    
-//    // Verificar CNPJ/CPF único (exceto para o próprio fornecedor)
-//    $stmt_check = $conn->prepare("SELECT codigo_fornecedor FROM Fornecedores WHERE cnpj_cpf = ? AND codigo_fornecedor != ?");
-//    $stmt_check->bind_param("si", $cnpj_cpf, $id);
-//    $stmt_check->execute();
-//    
-//    if ($stmt_check->get_result()->num_rows > 0) {
-//        throw new Exception('CNPJ/CPF já cadastrado para outro fornecedor');
-//    }
-//    
-//    // Atualizar fornecedor
-//    $stmt = $conn->prepare("UPDATE Fornecedores SET nome = ?, cnpj_cpf = ? WHERE codigo_fornecedor = ?");
-//    $stmt->bind_param("ssi", $nome, $cnpj_cpf, $id);
-//    
-//    if ($stmt->execute()) {
-//        echo json_encode(['status' => 'sucesso', 'mensagem' => 'Fornecedor atualizado com sucesso']);
-//    } else {
-//        throw new Exception('Erro ao atualizar fornecedor: ' . $conn->error);
-//    }
-//}
-
 function verificarDocumento($conn) {
     header('Content-Type: application/json'); // Garante o cabeçalho JSON
     
@@ -343,16 +296,34 @@ function verificarDocumento($conn) {
         $id = isset($_GET['id']) ? intval($_GET['id']) : null;
         
         if (empty($cnpj_cpf)) {
-            throw new Exception('CNPJ/CPF não fornecido');
+            // Não lança exceção, apenas retorna 'existe: false'
+            echo json_encode(['existe' => false, 'status' => 'sucesso']);
+            exit;
         }
 
-        $sql = "SELECT COUNT(*) as total FROM Fornecedores WHERE cnpj_cpf = '$cnpj_cpf'";
+        $sql = "SELECT COUNT(*) as total FROM Fornecedores WHERE cnpj_cpf = ?";
+        $params = ['s', $cnpj_cpf];
         
         if ($id) {
-            $sql .= " AND codigo_fornecedor != $id";
+            $sql .= " AND codigo_fornecedor != ?";
+            $params[] = 'i';
+            $params[] = $id;
         }
         
-        $result = $conn->query($sql);
+        $stmt = $conn->prepare($sql);
+
+        // Dynamic bind_param
+        $types = '';
+        $values = [];
+        for ($i = 0; $i < count($params); $i += 2) {
+            $types .= $params[$i];
+            $values[] = &$params[$i + 1]; // Passar por referência
+        }
+        array_unshift($values, $types);
+        call_user_func_array([$stmt, 'bind_param'], $values);
+        
+        $stmt->execute();
+        $result = $stmt->get_result();
         
         if (!$result) {
             throw new Exception('Erro na consulta ao banco de dados');
@@ -398,3 +369,4 @@ function deletarFornecedor($conn) {
         throw new Exception('Erro ao deletar fornecedor: ' . $conn->error);
     }
 }
+?>

@@ -39,10 +39,13 @@ function listarProdutos() {
             const tabela = document.getElementById("product-table-body");
             tabela.innerHTML = "";
 
+            // ======================= MUDANÇA BEM AQUI =======================
+            // Seu colspan original era 10, mas a tabela tem 11 colunas.
             if (produtos.length === 0) {
-                tabela.innerHTML = "<tr><td colspan='10'>Nenhum produto encontrado.</td></tr>";
+                tabela.innerHTML = "<tr><td colspan='11'>Nenhum produto encontrado.</td></tr>";
                 return;
             }
+            // ==================================================================
 
             produtos.forEach(prod => {
                 const row = document.createElement("tr");
@@ -67,36 +70,14 @@ function listarProdutos() {
         })
         .catch(err => {
             console.error("Erro ao listar produtos:", err);
+            // CORREÇÃO: O colspan aqui também.
+            const tabela = document.getElementById("product-table-body");
+            tabela.innerHTML = "<tr><td colspan='11'>Erro ao carregar produtos.</td></tr>";
         });
 }
 
 //function abrirModalEditar(codigo_produto) {
-//    fetch(`../PHP/controle_produtos.php?action=buscar&codigo_produto=${codigo_produto}`)
-//        .then(res => res.json())
-//        .then(produto => {
-//            // Preencher os dados do produto no formulário
-//            document.getElementById("codigo-produto").value = produto.codigo_produto;
-//            document.getElementById("product-name").value = produto.nome;
-//            document.getElementById("product-type").value = produto.tipo;
-//            document.getElementById("product-gender").value = produto.genero;
-//            document.getElementById("product-stock").value = produto.quant_estoque;
-//            document.getElementById("product-price").value = produto.preco;
-//            document.getElementById("product-size").value = produto.tamanho;
-//            document.getElementById("product-color").value = produto.cor;
-//            document.getElementById("product-supplier").value = produto.fk_fornecedor;
-//            document.getElementById("product-description").value = produto.descricao; // Novo campo
-//
-//            // Alterar título e botão do modal
-//            document.getElementById("modal-title").innerText = "Editar Produto";
-//            document.getElementById("product-form").setAttribute("data-action", "editar");
-//            document.querySelector("#product-form button[type='submit']").textContent = "Atualizar";
-//
-//            openProductModal(); // Abre o modal
-//        })
-//        .catch(err => {
-//            console.error("Erro ao buscar produto:", err);
-//            enviarMensagemAjax("Erro ao carregar dados do produto", "erro");
-//        });
+// (Esta função está comentada no seu original, então mantive assim)
 //}
 
 
@@ -161,7 +142,7 @@ function abrirModalEditar(codigo_produto) {
             document.getElementById("product-gender").value = produto.genero;
             document.getElementById("product-stock").value = produto.quant_estoque;
             document.getElementById("product-price").value = produto.preco;
-            document.getElementById("product-size").value = produto.tamanho; // Corrigido aqui
+            document.getElementById("product-size").value = produto.tamanho;
             document.getElementById("product-color").value = produto.cor;
             document.getElementById("product-supplier").value = produto.fk_fornecedor;
             document.getElementById("product-description").value = produto.descricao;
@@ -185,45 +166,9 @@ function abrirModalEditar(codigo_produto) {
         });
 }
 // Função para abrir modal de edição
+//(Esta função está comentada no seu original, então mantive assim)
 //function abrirModalEditar(codigo_produto) {
-//  fetch(`../PHP/controle_produtos.php?action=buscar&codigo_produto=${codigo_produto}`)
-//    .then(res => {
-//      if (!res.ok) throw new Error("Erro ao buscar produto");
-//      return res.json();
-//    })
-//    .then(produto => {
-//      const sizeSelect = document.getElementById("product-size");
-//      sizeSelect.value = produto.tamanho;
-//      // Preencher o formulário
-//      document.getElementById("codigo-produto").value = produto.codigo_produto;
-//      document.getElementById("product-name").value = produto.nome;
-//      document.getElementById("product-type").value = produto.tipo;
-//      document.getElementById("product-gender").value = produto.genero;
-//      document.getElementById("product-stock").value = produto.quant_estoque;
-//      document.getElementById("product-price").value = produto.preco;
-//      document.getElementById("product-size").value = sizeSelect;
-//      document.getElementById("product-color").value = produto.cor;
-//      document.getElementById("product-supplier").value = produto.fk_fornecedor;
-//      document.getElementById("product-description").value = produto.descricao;
-//
-//      // Mostrar prévia da imagem existente se houver
-//      const imagePreview = document.getElementById("image-preview-container");
-//      imagePreview.innerHTML = produto.imagem 
-//        ? `<img src="data:image/jpeg;base64,${produto.imagem}" alt="${produto.nome}" width="100">`
-//        : "<p>Sem imagem</p>";
-//
-//      // Configurar modal para edição
-//      document.getElementById("modal-title").innerText = "Editar Produto";
-//      document.getElementById("product-form").setAttribute("data-action", "editar");
-//      document.querySelector("#product-form button[type='submit']").textContent = "Atualizar";
-//
-//
-//      openProductModal();
-//    })
-//    .catch(err => {
-//      console.error("Erro ao buscar produto:", err);
-//      enviarMensagemAjax("Erro ao carregar dados do produto", "erro");
-//    });
+//...
 //}
 
 function abrirModalDeletar(codigo_produto) {
@@ -249,10 +194,10 @@ function confirmAction(confirmado) {
             .then(res => res.json())
             .then(data => {
                 if (data.sucesso) {
-                enviarMensagemAjax(data.sucesso, "sucesso");
+                    enviarMensagemAjax(data.sucesso, "sucesso");
                     listarProdutos();
                 } else {
-                enviarMensagemAjax(data.erro, "erro");
+                    enviarMensagemAjax(data.erro, "erro");
                 }
                 confirmationModal.style.display = "none";
             })

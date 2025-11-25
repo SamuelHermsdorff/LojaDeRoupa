@@ -1,12 +1,33 @@
+// ATUALIZADO: Event listener DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
     listarFornecedores();
     
-    // Configurar busca
     const searchInput = document.getElementById("search-supplier");
     if (searchInput) {
         searchInput.addEventListener("input", debounce(listarFornecedores, 300));
     }
+    
+    const cnpjCpfInput = document.getElementById("supplier-cnpj-cpf");
+    if (cnpjCpfInput) {
+        cnpjCpfInput.addEventListener("input", function(e) {
+            formatarCpfCnpj(e);
+            const idAtual = document.getElementById("supplier-id").value;
+            validarCpfCnpj(e.target, idAtual || null);
+        });
+        
+        cnpjCpfInput.addEventListener("blur", function(e) {
+            const idAtual = document.getElementById("supplier-id").value;
+            validarCpfCnpj(e.target, idAtual || null);
+        });
+    }
+
+    // ADICIONADO: Listener para o novo campo de telefone
+    const telefoneInput = document.getElementById("supplier-phone");
+    if (telefoneInput) {
+        telefoneInput.addEventListener("input", formatTelefone);
+    }
 });
+
 
 // Função debounce para a busca
 function debounce(func, wait) {
@@ -27,7 +48,7 @@ function openSupplierModal() {
     document.getElementById("supplier-modal").style.display = "flex";
 }
 
-
+// ATUALIZADO: listarFornecedores
 async function listarFornecedores() {
     try {
         const searchTerm = document.getElementById("search-supplier").value.trim();
@@ -37,17 +58,23 @@ async function listarFornecedores() {
         const tabela = document.getElementById("supplier-table-body");
         tabela.innerHTML = "";
         
+        // MUDANÇA: colspan atualizado para 7 colunas
         if (fornecedores.length === 0) {
-            tabela.innerHTML = `<tr><td colspan="4">Nenhum fornecedor encontrado</td></tr>`;
+            tabela.innerHTML = `<tr><td colspan="7">Nenhum fornecedor encontrado</td></tr>`;
             return;
         }
         
         fornecedores.forEach(fornecedor => {
             const row = document.createElement("tr");
+            
+            // MUDANÇA: row.innerHTML atualizado com as novas colunas
             row.innerHTML = `
                 <td>${fornecedor.codigo_fornecedor}</td>
                 <td>${fornecedor.nome}</td>
                 <td>${fornecedor.cnpj_cpf}</td>
+                <td>${fornecedor.telefone || ''}</td>
+                <td>${fornecedor.edereco || ''}</td>
+                <td>${fornecedor.nome_representante || ''}</td>
                 <td>
                     <button class="edit-button" onclick="abrirModalEditar(${fornecedor.codigo_fornecedor})">Editar</button>
                     <button class="delete-button" onclick="abrirModalDeletar(${fornecedor.codigo_fornecedor})">Deletar</button>
@@ -58,10 +85,12 @@ async function listarFornecedores() {
     } catch (error) {
         console.error("Erro ao listar fornecedores:", error);
         const tabela = document.getElementById("supplier-table-body");
-        tabela.innerHTML = `<tr><td colspan="4">Erro ao carregar fornecedores</td></tr>`;
+        // MUDANÇA: colspan atualizado para 7 colunas
+        tabela.innerHTML = `<tr><td colspan="7">Erro ao carregar fornecedores</td></tr>`;
     }
 }
 
+// ATUALIZADO: abrirModalEditar
 function abrirModalEditar(id) {
     fetch(`../PHP/controle_fornecedores.php?action=buscar&id=${id}`)
         .then(res => res.json())
@@ -75,6 +104,11 @@ function abrirModalEditar(id) {
             document.getElementById("supplier-id").value = fornecedor.codigo_fornecedor;
             document.getElementById("supplier-name").value = fornecedor.nome;
             document.getElementById("supplier-cnpj-cpf").value = fornecedor.cnpj_cpf;
+
+            // CAMPOS ADICIONADOS
+            document.getElementById("supplier-phone").value = fornecedor.telefone || '';
+            document.getElementById("supplier-address").value = fornecedor.edereco || ''; // Usando 'edereco'
+            document.getElementById("supplier-rep").value = fornecedor.nome_representante || '';
             
             // Configurar modal para edição
             document.getElementById("modal-title").textContent = "Editar Fornecedor";
@@ -138,12 +172,13 @@ function enviarMensagemAjax(mensagem, tipo) {
         mensagemContainer.innerHTML = `<div class="mensagem erro">${mensagem}</div>`;
     }
 
-    // Exibe a mensagem por 3 segundos e depois a oculta
+    // Exibe a mensagem e depois a oculta
     setTimeout(() => {
         mensagemContainer.innerHTML = '';
-    }, 800);
+    }, 1500); // Aumentei o tempo para 1.5s
 }
-// Modificar a função salvarFornecedor para verificação final
+
+// ATUALIZADO: salvarFornecedor
 async function salvarFornecedor(event) {
     event.preventDefault();
     
@@ -158,11 +193,27 @@ async function salvarFornecedor(event) {
         const cnpjCpfFormatado = cnpjCpfInput.value;
         const cnpjCpfNumeros = cnpjCpfFormatado.replace(/\D/g, '');
         
+        // NOVOS VALORES
+        const telefoneInput = document.getElementById("supplier-phone");
+        const telefoneFormatado = telefoneInput.value;
+        const telefoneNumeros = telefoneFormatado.replace(/\D/g, '');
+        const endereco = document.getElementById("supplier-address").value.trim();
+        const representante = document.getElementById("supplier-rep").value.trim();
+
         // Validações
         if (!nome || nome.length < 3) {
             throw new Error("Nome deve ter pelo menos 3 caracteres");
         }
         
+        // NOVAS VALIDAÇÕES (com base no seu BD 'NOT NULL')
+        if (telefoneNumeros.length < 10) { // 10 para fixo, 11 para celular
+            throw new Error("Telefone inválido. Deve ter 10 ou 11 dígitos.");
+        }
+        if (!endereco) { // 'edereco' é NOT NULL
+            throw new Error("O campo Endereço é obrigatório.");
+        }
+        // (nome_representante é NULL, então não é obrigatório)
+
         // Verificação final do documento
         const idAtual = id || null;
         const documentoDuplicado = await verificarDocumentoExistente(cnpjCpfFormatado, idAtual);
@@ -182,6 +233,12 @@ async function salvarFornecedor(event) {
         const formData = new URLSearchParams();
         formData.append("nome", nome);
         formData.append("cnpj_cpf", cnpjCpfFormatado);
+        
+        // NOVOS DADOS
+        formData.append("telefone", telefoneFormatado);
+        formData.append("edereco", endereco); // Usando 'edereco'
+        formData.append("nome_representante", representante);
+
         if (id) formData.append("id", id);
         
         // Enviar dados
@@ -197,11 +254,15 @@ async function salvarFornecedor(event) {
         }
         
         enviarMensagemAjax(data.mensagem, "sucesso");
+        
+        // MUDANÇA: Aumentei o tempo para 1000ms (1s) para a msg ser lida
         setTimeout(() => {
             window.location.reload();
-        }, 450);
-        listarFornecedores();
-        closeSupplierModal();
+        }, 1000); 
+        
+        // Não é mais necessário chamar listarFornecedores() ou closeSupplierModal() aqui
+        // pois a página inteira vai recarregar.
+
     } catch (error) {
         console.error("Erro ao salvar fornecedor:", error);
         enviarMensagemAjax(error.message, "erro");
@@ -254,10 +315,12 @@ async function verificarDocumentoExistente(cnpjCpfFormatado, idAtual = null) {
         
         if (data.existe) {
             exibirMensagem("Este CPF/CNPJ já está cadastrado", false, document.getElementById("supplier-cnpj-cpf"));
-            //enviarMensagemAjax("CPF/CNPJ já está cadastrado", "erro");
             documentoValido = false;
             return true;
         }
+        // Se não existe, limpa a msg de erro e marca como válido
+        limparMensagem(document.getElementById("supplier-cnpj-cpf"));
+        documentoValido = true;
         return false;
     } catch (error) {
         console.error("Erro ao verificar documento:", error);
@@ -334,8 +397,6 @@ function validarCNPJ(cnpj) {
 
 // Funções auxiliares para exibir mensagens (já existentes)
 function exibirMensagem(mensagem, sucesso, input) {
-    // Você pode implementar a exibição de mensagens como preferir
-    // Por exemplo, adicionar um pequeno texto abaixo do campo
     let mensagemElement = input.nextElementSibling;
     if (!mensagemElement || !mensagemElement.classList.contains('mensagem-validacao')) {
         mensagemElement = document.createElement('small');
@@ -350,7 +411,7 @@ function exibirMensagem(mensagem, sucesso, input) {
 function limparMensagem(input) {
     const mensagemElement = input.nextElementSibling;
     if (mensagemElement && mensagemElement.classList.contains('mensagem-validacao')) {
-        mensagemElement.textContent = '';
+        mensagemElement.remove(); // Remove o elemento
     }
 }
 // Adicionar esta variável global para controlar a validação
@@ -380,6 +441,7 @@ function validarCpfCnpj(input, idAtual = null) {
     
     // Verificar duplicados apenas se for válido
     if (isValid) {
+        documentoValido = true; // Assume válido até checar duplicado
         verificarDocumentoExistente(input.value, idAtual)
             .then(existe => {
                 if (existe) {
@@ -387,42 +449,64 @@ function validarCpfCnpj(input, idAtual = null) {
                     documentoValido = false;
                 }
             });
+    } else {
+      documentoValido = false;
     }
     
-    documentoValido = isValid;
     return isValid;
 }
 
 // Adicionar validação ao fechar o modal para limpar o estado
 function closeSupplierModal() {
     document.getElementById("supplier-modal").style.display = "none";
-    document.getElementById("supplier-form").reset();
+    const form = document.getElementById("supplier-form");
+    if(form) {
+        form.reset();
+        // Limpa todas as mensagens de validação
+        form.querySelectorAll('.mensagem-validacao').forEach(msg => msg.remove());
+    }
     document.getElementById("modal-title").textContent = "Cadastrar Fornecedor";
     document.getElementById("supplier-form").removeAttribute("data-action");
     document.getElementById("supplier-id").value = "";
     documentoValido = false; // Resetar o estado de validação
 }
-// Modificar o event listener para incluir o ID atual quando editando
-document.addEventListener("DOMContentLoaded", () => {
-    listarFornecedores();
-    
-    const searchInput = document.getElementById("search-supplier");
-    if (searchInput) {
-        searchInput.addEventListener("input", debounce(listarFornecedores, 300));
-    }
-    
-    const cnpjCpfInput = document.getElementById("supplier-cnpj-cpf");
-    if (cnpjCpfInput) {
-        cnpjCpfInput.addEventListener("input", function(e) {
-            formatarCpfCnpj(e);
-            const idAtual = document.getElementById("supplier-id").value;
-            validarCpfCnpj(e.target, idAtual || null);
-        });
-        
-        cnpjCpfInput.addEventListener("blur", function(e) {
-            const idAtual = document.getElementById("supplier-id").value;
-            validarCpfCnpj(e.target, idAtual || null);
-        });
-    }
-});
 
+
+// -----------------------------------------------------------------
+// ADICIONADO: FUNÇÃO DE FORMATAR TELEFONE (do seu controle-clientes-java.js)
+// -----------------------------------------------------------------
+function formatTelefone(event) {
+    const input = event.target;
+    let value = input.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+    
+    // Limita a 11 caracteres (DDD + número)
+    if (value.length > 11) {
+        value = value.substring(0, 11);
+    }
+    
+    // Aplica a formatação ( (XX) XXXXX-XXXX ou (XX) XXXX-XXXX )
+    // Esta máscara se adapta a 10 ou 11 dígitos
+    if (value.length > 10) { // Celular (11 dígitos)
+        value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+    } else if (value.length > 6) { // Fixo (10 dígitos)
+        value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+    } else if (value.length > 2) {
+        value = value.replace(/^(\d{2})(\d*).*/, '($1) $2');
+    } else if (value.length > 0) {
+        value = value.replace(/^(\d*)/, '($1');
+    }
+    
+    // Atualiza o valor do campo
+    input.value = value;
+    
+    // Validação em tempo real
+    const telefoneCompleto = (value.replace(/\D/g, '').length === 10 || value.replace(/\D/g, '').length === 11);
+    
+    if (value.length > 0 && !telefoneCompleto) {
+        exibirMensagem("Telefone incompleto", false, input);
+    } else if (telefoneCompleto) {
+        limparMensagem(input); // Limpa a mensagem se for válido
+    } else {
+        limparMensagem(input);
+    }
+}

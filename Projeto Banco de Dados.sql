@@ -10,7 +10,11 @@ CREATE TABLE Usuarios (
     	email VARCHAR(60) NOT NULL UNIQUE,
     	senha VARCHAR(255) NOT NULL,
         funcionario BOOLEAN NOT NULL,
-        administrador BOOLEAN NOT NULL
+        administrador BOOLEAN NOT NULL,
+
+	-- Colunas adicionadas para o reset de senha --
+    	reset_token VARCHAR(64) NULL,
+    	reset_expires DATETIME NULL
 );
 
 CREATE TABLE Pedidos (
@@ -30,8 +34,11 @@ CREATE TABLE Pedidos (
 
 CREATE TABLE Fornecedores (
     	codigo_fornecedor INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    	nome VARCHAR(60) NOT NULL,
-    	cnpj_cpf VARCHAR(18) NOT NULL UNIQUE
+    	nome VARCHAR(255) NOT NULL,
+    	cnpj_cpf VARCHAR(18) NOT NULL UNIQUE,
+	telefone VARCHAR(15) NOT NULL,
+	edereco VARCHAR(128) NOT NULL,
+	nome_representante VARCHAR(128) NULL
 );
 
 CREATE TABLE Produtos (

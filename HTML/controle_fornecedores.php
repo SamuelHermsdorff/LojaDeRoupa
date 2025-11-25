@@ -34,7 +34,6 @@ if (!$_SESSION['usuario']['funcionario'] && !$_SESSION['usuario']['administrador
     <button class="menu-button" onclick="toggleMenu()">☰</button>
   </header>
 
-  <!-- Container para mensagens -->
   <div id="mensagem"></div>
 
   <main>
@@ -49,16 +48,17 @@ if (!$_SESSION['usuario']['funcionario'] && !$_SESSION['usuario']['administrador
           <th>Código</th>
           <th>Nome</th>
           <th>CNPJ/CPF</th>
+          <th>Telefone</th>
+          <th>Endereço</th>
+          <th>Representante</th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody id="supplier-table-body">
-        <!-- Dados serão carregados aqui -->
-      </tbody>
+        </tbody>
     </table>
   </main>
 
-  <!-- Modal para cadastro/edição -->
   <div id="supplier-modal" class="modal">
     <div class="modal-content">
       <span class="close-button" onclick="closeSupplierModal()">&times;</span>
@@ -72,15 +72,22 @@ if (!$_SESSION['usuario']['funcionario'] && !$_SESSION['usuario']['administrador
         <label for="supplier-cnpj-cpf">CNPJ/CPF:</label>
         <input type="text" id="supplier-cnpj-cpf" name="cnpj_cpf" required>
 
+        <label for="supplier-phone">Telefone:</label>
+        <input type="tel" id="supplier-phone" name="telefone" required maxlength="15">
+
+        <label for="supplier-address">Endereço:</label>
+        <input type="text" id="supplier-address" name="edereco" required maxlength="128">
+
+        <label for="supplier-rep">Nome do Representante:</label>
+        <input type="text" id="supplier-rep" name="nome_representante" maxlength="128">
         <button type="submit" class="save-button">Salvar</button>
       </form>
     </div>
   </div>
 
-  <!-- Modal de confirmação -->
   <div id="confirmation-modal" class="confirmation-modal">
     <div class="confirmation-content">
-      <h3 id="confirmation-message">Deseja realmente apagar este registro?</h3>
+      <h2 id="confirmation-message">Deseja realmente apagar este registro?</h2>
       <div class="confirmation-buttons">
         <button onclick="confirmarAcao(true)">Sim</button>
         <button onclick="confirmarAcao(false)">Não</button>

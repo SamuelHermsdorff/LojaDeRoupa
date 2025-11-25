@@ -100,7 +100,7 @@ if (!$_SESSION['usuario']['funcionario'] && !$_SESSION['usuario']['administrador
 
   <div id="confirmation-modal" class="confirmation-modal">
     <div class="confirmation-content">
-      <h3 id="confirmation-message">Deseja realmente apagar este registro?</h3>
+      <h2 id="confirmation-message">Deseja realmente apagar este registro?</h2>
       <div class="confirmation-buttons">
         <button onclick="confirmarAcao(true)">Sim</button>
         <button onclick="confirmarAcao(false)">Não</button>

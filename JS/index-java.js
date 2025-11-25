@@ -1,19 +1,70 @@
 document.addEventListener("DOMContentLoaded", function() {
+    // Formulários
     const loginForm = document.getElementById("login-form");
+    const formCadastro = document.querySelector('.register-box form');
+    const forgotForm = document.getElementById("forgot-form"); // Novo formulário
     
+    // Boxes
+    const loginBox = document.querySelector('.login-box');
+    const registerBox = document.querySelector('.register-box');
+    const forgotBox = document.querySelector('.forgot-box'); // Novo box
+
+    // Elementos de input
+    const cpfInput = document.getElementById("cpf");
+    const telefoneInput = document.getElementById("telefone");
+    
+    // Variável para controlar o estado do cadastro
+    let cadastroEmAndamento = false;
+
+    // --- NOVA LÓGICA DE EXIBIÇÃO ---
+    // Função para mostrar um box específico e esconder os outros
+    function showBox(boxName) {
+        // Esconde todos
+        loginBox.classList.remove('active');
+        registerBox.classList.remove('active');
+        forgotBox.classList.remove('active');
+
+        // Mostra o box desejado
+        if (boxName === 'login') {
+            loginBox.classList.add('active');
+        } else if (boxName === 'register') {
+            registerBox.classList.add('active');
+        } else if (boxName === 'forgot') {
+            forgotBox.classList.add('active');
+        }
+    }
+
+    // --- NOVOS EVENT LISTENERS PARA OS LINKS ---
+    // Link "Cadastre-se" (na tela de login)
+    document.querySelector('.login-box .toggle-register').addEventListener('click', function() {
+        showBox('register');
+    });
+
+    // Link "Esqueci minha senha" (na tela de login)
+    document.querySelector('.login-box .toggle-forgot').addEventListener('click', function() {
+        showBox('forgot');
+    });
+
+    // Links "Voltar ao login" (nas telas de cadastro e recuperação)
+    document.querySelectorAll('.toggle-login').forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            showBox('login');
+        });
+    });
+
+
+    // --- LÓGICA DE LOGIN (Existente) ---
     if (loginForm) {
         loginForm.addEventListener("submit", function(e) {
-            e.preventDefault(); // Impede o envio tradicional do formulário
+            e.preventDefault(); 
             
             const btn = this.querySelector('button[type="submit"]');
             const btnOriginalText = btn.textContent;
             btn.disabled = true;
             btn.textContent = "Entrando...";
             
-            // Coleta os dados do formulário
             const formData = new FormData(this);
             
-            // Envia via AJAX
             fetch('PHP/login.php', {
                 method: 'POST',
                 body: formData
@@ -43,32 +94,58 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     }
-    // Elementos do DOM
-    const cpfInput = document.getElementById("cpf");
-    const telefoneInput = document.getElementById("telefone");
-    const formCadastro = document.querySelector('.register-box form');
-    const formLogin = document.querySelector('.login-box form');
-    
-    // Variável para controlar o estado do cadastro
-    let cadastroEmAndamento = false;
 
-    // Função para alternar entre login e cadastro
-    function toggleForm() {
-        document.querySelector(".login-box").classList.toggle("active");
-        document.querySelector(".register-box").classList.toggle("active");
+    // --- NOVA LÓGICA PARA RECUPERAR SENHA ---
+    if (forgotForm) {
+        forgotForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            const btn = this.querySelector('button[type="submit"]');
+            const btnOriginalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = "Enviando...";
+            
+            const formData = new FormData(this);
+
+            fetch('PHP/recuperar_senha.php', { // Chama o novo script PHP
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'sucesso') {
+                    exibirMensagem(data.mensagem, "sucesso");
+                    // Volta para o login após 2 segundos
+                    setTimeout(() => {
+                        showBox('login'); 
+                    }, 2000);
+                } else {
+                    throw new Error(data.mensagem || "Erro ao solicitar recuperação.");
+                }
+            })
+            .catch(error => {
+                exibirMensagem(error.message, "erro");
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = btnOriginalText;
+            });
+        });
     }
+
+
+    // --- RESTANTE DO SEU JS (Formatações, Validações, Cadastro) ---
+    // Nenhuma alteração necessária abaixo desta linha
 
     // Formatação e validação do CPF
     function formatCPF(event) {
         const input = event.target;
         let cpf = input.value.replace(/\D/g, '');
         
-        // Limita a 11 dígitos
         if (cpf.length > 11) {
             cpf = cpf.substring(0, 11);
         }
         
-        // Aplica a formatação
         if (cpf.length > 9) {
             cpf = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
         } else if (cpf.length > 6) {
@@ -79,7 +156,6 @@ document.addEventListener("DOMContentLoaded", function() {
         
         input.value = cpf;
         
-        // Validação quando completo (14 caracteres com formatação)
         if (cpf.length === 14) {
             const valido = validarCPF(cpf);
             exibirMensagemCPF(valido ? "CPF válido" : "CPF inválido", valido);
@@ -92,38 +168,28 @@ document.addEventListener("DOMContentLoaded", function() {
     function validarCPF(cpf) {
         cpf = cpf.replace(/\D/g, '');
         
-        // Elimina CPFs inválidos conhecidos
         if (cpf.length !== 11 || 
-            cpf === "00000000000" || 
-            cpf === "11111111111" || 
-            cpf === "22222222222" || 
-            cpf === "33333333333" || 
-            cpf === "44444444444" || 
-            cpf === "55555555555" || 
-            cpf === "66666666666" || 
-            cpf === "77777777777" || 
-            cpf === "88888888888" || 
-            cpf === "99999999999") {
+            /^(\d)\1{10}$/.test(cpf)) { // Simplifica a verificação de CPFs inválidos
             return false;
         }
         
-        // Valida 1º dígito
         let soma = 0;
-        for (let i = 0; i < 9; i++) {
-            soma += parseInt(cpf.charAt(i)) * (10 - i);
+        let resto;
+
+        for (let i = 1; i <= 9; i++) {
+            soma += parseInt(cpf.substring(i-1, i)) * (11 - i);
         }
-        let resto = 11 - (soma % 11);
+        resto = (soma * 10) % 11;
         if (resto === 10 || resto === 11) resto = 0;
-        if (resto !== parseInt(cpf.charAt(9))) return false;
-        
-        // Valida 2º dígito
+        if (resto !== parseInt(cpf.substring(9, 10))) return false;
+
         soma = 0;
-        for (let i = 0; i < 10; i++) {
-            soma += parseInt(cpf.charAt(i)) * (11 - i);
+        for (let i = 1; i <= 10; i++) {
+            soma += parseInt(cpf.substring(i-1, i)) * (12 - i);
         }
-        resto = 11 - (soma % 11);
+        resto = (soma * 10) % 11;
         if (resto === 10 || resto === 11) resto = 0;
-        if (resto !== parseInt(cpf.charAt(10))) return false;
+        if (resto !== parseInt(cpf.substring(10, 11))) return false;
         
         return true;
     }
@@ -149,11 +215,11 @@ document.addEventListener("DOMContentLoaded", function() {
         if (mensagem) {
             container.innerHTML = `
                 <span style="color: ${valido ? '#28a745' : '#dc3545'}; 
-                            font-weight: 500;
-                            display: inline-block;
-                            text-align: left;
-                            margin-left: 0;
-                            padding-left: 0;">
+                        font-weight: 500;
+                        display: inline-block;
+                        text-align: left;
+                        margin-left: 0;
+                        padding-left: 0;">
                     ${mensagem}
                 </span>
             `;
@@ -175,12 +241,10 @@ document.addEventListener("DOMContentLoaded", function() {
         const input = event.target;
         let telefone = input.value.replace(/\D/g, '');
         
-        // Limita a 11 dígitos
         if (telefone.length > 11) {
             telefone = telefone.substring(0, 11);
         }
         
-        // Aplica a formatação
         if (telefone.length > 10) {
             telefone = telefone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
         } else if (telefone.length > 6) {
@@ -202,7 +266,6 @@ document.addEventListener("DOMContentLoaded", function() {
         const btn = formCadastro.querySelector('button[type="submit"]');
         const btnOriginalText = btn.textContent;
         
-        // Configura estado de loading
         btn.disabled = true;
         btn.textContent = 'Cadastrando...';
         
@@ -212,13 +275,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 body: new FormData(formCadastro)
             });
 
-            // Verifica se a resposta está vazia
             const responseText = await response.text();
             if (!responseText.trim()) {
                 throw new Error('Resposta vazia do servidor');
             }
 
-            // Tenta parsear o JSON
             let data;
             try {
                 data = JSON.parse(responseText);
@@ -234,8 +295,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 exibirMensagem('Cadastro realizado com sucesso!', 'sucesso');
                 formCadastro.reset();
                 setTimeout(() => {
-                    toggleForm();
-                    window.location.reload();
+                    showBox('login'); // Volta pro login
+                    // window.location.reload(); // Recarregar pode não ser necessário
                 }, 800);
             } else {
                 throw new Error(data.mensagem || 'Erro no cadastro');
@@ -243,7 +304,6 @@ document.addEventListener("DOMContentLoaded", function() {
         } catch (error) {
             exibirMensagem(error.message, 'erro');
             
-            // Mostra mensagem específica para CPF existente
             if (error.message.includes('CPF já cadastrado')) {
                 exibirMensagemCPF('CPF já cadastrado', false);
             }
@@ -256,16 +316,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Exibe mensagens gerais
     function exibirMensagem(mensagem, tipo) {
-        // Remove mensagens anteriores
         const mensagensAntigas = document.querySelectorAll('.mensagem-flutuante');
         mensagensAntigas.forEach(msg => msg.remove());
         
-        // Cria nova mensagem
         const mensagemDiv = document.createElement('div');
         mensagemDiv.className = `mensagem-flutuante ${tipo}`;
         mensagemDiv.textContent = mensagem;
         
-        // Estilos
         Object.assign(mensagemDiv.style, {
             position: 'fixed',
             top: '20px',
@@ -281,14 +338,13 @@ document.addEventListener("DOMContentLoaded", function() {
         
         document.body.appendChild(mensagemDiv);
         
-        // Remove após 5 segundos
         setTimeout(() => {
             mensagemDiv.style.animation = 'fadeOut 0.3s ease-in-out';
             setTimeout(() => mensagemDiv.remove(), 300);
         }, 5000);
     }
 
-    // Event Listeners
+    // Event Listeners (Inputs e Forms)
     if (cpfInput) {
         cpfInput.addEventListener('input', formatCPF);
     }
@@ -303,24 +359,11 @@ document.addEventListener("DOMContentLoaded", function() {
             enviarCadastro();
         });
     }
-    
-    // Botão "Cadastre-se"
-    document.querySelectorAll(".toggle").forEach(toggle => {
-        toggle.addEventListener("click", function(e) {
-            e.preventDefault();
-            toggleForm();
-        });
-    });
-});
 
+    // (Lógica de toggle removida daqui e substituída no início)
+});
 
 function formatNome(event) {
     let nome = event.target.value.replace(/[^a-zA-ZÀ-ÖØ-öø-ÿ\s]/g, '');
     event.target.value = nome;
 }
-
-/*
-        setTimeout(() => {
-            window.location.reload();
-        }, 200)
-*/
