@@ -28,8 +28,11 @@ CREATE TABLE Pedidos (
     status VARCHAR(50) DEFAULT 'A pagar',
     forma_pagamento VARCHAR(50) NULL DEFAULT 'Não especificado',
     valor_total NUMERIC(10, 2) NULL,
-    usuario_id INT, -- Referência à tabela de usuários
-    FOREIGN KEY (usuario_id) REFERENCES Usuarios (id) -- Define a chave estrangeira
+    
+    usuario_id INT NULL, -- Agora aceita NULL explicitamente
+    
+    -- Configuração para apagar o usuário sem apagar o pedido
+    FOREIGN KEY (usuario_id) REFERENCES Usuarios (id) ON DELETE SET NULL
 );
 
 CREATE TABLE Fornecedores (
